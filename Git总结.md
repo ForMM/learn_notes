@@ -16,6 +16,7 @@
 git init;  # 新建一个仓库
 git add Git总结.md;  #添加Git总结.md文件到暂存区
 git commit -m “first time”;  #将暂存区文件提交到本地仓库
+#注意：提交到本地仓库整体流程，git add-->git commit两个命令都要执行
 
 #设置名字和邮箱，每次提交时都会跟踪名字和邮箱
 git config --global user.name "linkk"; 
@@ -30,6 +31,10 @@ git log;  #提交日志记录
 git reset --hard HEAD^;  #回退到上一个版本
 git reflog;  #查看命令历史记录
 git reset --hard 1092a; #1092a代表commit id
+
+#撤销修改
+git checkout -- Git总结.md;  #撤销工作区的修改，有两种情况：1.修改后没有提交暂存区，撤销恢复到版本库一致；2修改后提交了暂存区，撤销恢复到暂存区时的内容。
+
 ```
 
 
