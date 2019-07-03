@@ -37,7 +37,8 @@ git checkout -- Git总结.md;  #撤销工作区的修改，有两种情况：1.�
 
 #删除文件
 rm Git总结.md;  #工作去删除文件
-git rm Git总结.md;  #从版本库中删除文件
+git rm Git总结.md;  #从版本库中删除文件，若删除错了，用checkout恢复
+
 
 ```
 
