@@ -24,12 +24,17 @@ git config --global user.email "linkeke_sea@163.com";
 git status;  #查看当前仓库状态
 git diff readme.txt;  #查看文件的不同之处
 git rm --cached Git总结.md;  #将Git总结.md文件暂存区删除掉
-git
+
+#版本回退
+git log;  #提交日志记录
+git reset --hard HEAD^;  #回退到上一个版本
+git reflog;  #查看命令历史记录
+git reset --hard 1092a; #1092a代表commit id
 ```
 
 
 
-#### 
+
 
 
 
