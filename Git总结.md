@@ -45,6 +45,9 @@ ssh-keygen -t rsa -C "linkeke_sea@163.com";  #本地生成ssh私钥、公钥，�
 git remote add origin git@github.com:ForMM/learn_notes.git;  #关联远程仓库
 git push -u origin master;  #推送到远程仓库
 
+#远程库克隆项目
+git clone git@github.com:ForMM/HelloBoy.git;  #克隆远程项目到本地
+
 
 
 
