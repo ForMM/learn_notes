@@ -42,6 +42,9 @@ git rm Git总结.md;  #从版本库中删除文件，若删除错了，用checko
 #git和github之间通过ssh加密传输，需要在本地生成ssh key放到github上
 #添加远程仓库
 ssh-keygen -t rsa -C "linkeke_sea@163.com";  #本地生成ssh私钥、公钥，将公钥放到github上
+git remote add origin git@github.com:ForMM/learn_notes.git;  #关联远程仓库
+git push -u origin master;  #推送到远程仓库
+
 
 
 
