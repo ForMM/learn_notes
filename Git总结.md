@@ -49,7 +49,8 @@ git push -u origin master;  #推送到远程仓库
 git clone git@github.com:ForMM/HelloBoy.git;  #克隆远程项目到本地
 
 #创建与合并分支
-
+git checkout -b dev;  #创建分支
+git branch;  #查看分支
 
 
 
