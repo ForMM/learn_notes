@@ -56,6 +56,8 @@ git checkout master;  #切换分支到master
 git merge dev;  #解决冲突，快速合并到master
 git branch -d dev;  #删除分支dev
 
+#解决冲突
+
 
 
 
