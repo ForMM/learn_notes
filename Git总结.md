@@ -49,9 +49,13 @@ git push -u origin master;  #推送到远程仓库
 git clone git@github.com:ForMM/HelloBoy.git;  #克隆远程项目到本地
 
 #创建与合并分支
-git checkout -b dev;  #创建分支
 git branch;  #查看分支
 git checkout master;  #切换分支到master
+git checkout -b dev;  #创建分支并切换分支到dev,然后修改文件提交,需要切换到master
+git checkout master;  #切换分支到master
+git merge dev;  #解决冲突，快速合并到master
+git branch -d dev;  #删除分支dev
+
 
 
 
