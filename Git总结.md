@@ -57,7 +57,7 @@ git merge dev;  #解决冲突，快速合并到master
 git branch -d dev;  #删除分支dev
 
 #解决冲突
-
+#主干冲突测试
 
 
 
