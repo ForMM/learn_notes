@@ -57,8 +57,7 @@ git merge dev;  #解决冲突，快速合并到master
 git branch -d dev;  #删除分支dev
 
 #解决冲突
-#主干冲突测试
-#测试解决冲突
+git log --graph --pretty=oneline --abbrev-commit;  #可以查看合并信息
 
 
 
