@@ -62,6 +62,17 @@ git merge --no-ff -m "merge with no-ff" dev;  #普通模式合并，到时查看
 
 #bug分支管理（当在dev分支上开发一个版本，突然来了紧急bug，需要立刻处理）
 git stash;  #保存工作目录
+git checkout master;
+git checkout -b bug-1;
+git add Git总结.md;
+git commit -m "bug-1";
+git checkout master;
+git merge --no-ff -m "merged bug fix 1" bug-1;
+git checkout dev;
+git stash pop;  #恢复dev的工作区，继续在之前保存的基础上开发
+
+
+
 
 
 
