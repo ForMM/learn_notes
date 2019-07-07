@@ -74,6 +74,11 @@ git stash pop;  #恢复dev的工作区，继续在之前保存的基础上开发
 git branch -D feture-1;  #强制删除
 
 #多人协作
+git remote -v;  #查看远程分支信息
+git pull;  #把远程分支内容拿下来（当拿下来后有冲突，需要解决冲突）
+
+#rebase让提交日志变成一条直线
+git rebase;
 
 
 
