@@ -70,7 +70,8 @@ git checkout master;
 git merge --no-ff -m "merged bug fix 1" bug-1;
 git checkout dev;
 git stash pop;  #恢复dev的工作区，继续在之前保存的基础上开发
-
+#当开发新功能，建议也新建一个分支，最后合并，当新功能不准上线，可以删除这个分支
+git branch -D feature-1；  #强制删除
 
 
 
