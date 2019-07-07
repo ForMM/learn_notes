@@ -71,6 +71,8 @@ git merge --no-ff -m "merged bug fix 1" bug-1;
 git checkout dev;
 git stash pop;  #恢复dev的工作区，继续在之前保存的基础上开发
 
+#多人协作
+
 
 
 
