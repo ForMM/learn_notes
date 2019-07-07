@@ -61,7 +61,7 @@ git log --graph --pretty=oneline --abbrev-commit;  #可以查看合并信息
 git merge --no-ff -m "merge with no-ff" dev;  #普通模式合并，到时查看日志可以看得出具体分支合并
 
 #bug分支管理（当在dev分支上开发一个版本，突然来了紧急bug，需要立刻处理）
-
+git stash;  #保存工作目录
 
 
 
