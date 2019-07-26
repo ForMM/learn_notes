@@ -15,3 +15,14 @@
 
 1.@controller、@restcontroller区别
 
+
+
+
+
+### Springboot集成logback、mdc日志打印追踪
+
+理解类：
+
+1. HandlerInterceptorAdapter
+2. WebMvcConfigurer
+
