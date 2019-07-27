@@ -17,11 +17,13 @@
 @controller
 @restcontroller
 
-@Configuration
-配置、启动spring容器，相对于之前spring配置文件中beans标签
-@Configuration+@Bean (@Configuration+@Componet)
-启动容器+注册Bean
+@Configuration  (配置、启动spring容器，相对于之前spring配置文件中beans标签)
+@Configuration+@Bean (@Configuration+@Componet)  (启动容器+注册Bean)
 
+@Aspect  (声明一个切面类)
+@Pointcut("execution(public * com.example.demo.controller..*.*(..))")  （声明切入点）
+@Before("webLog()")   （调用切入点方法前处预处理）
+@AfterReturning(pointcut = "webLog()", returning = "ret")  （执行后的后处理）
 
 
 ~~~
