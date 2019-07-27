@@ -13,16 +13,32 @@
 
 ## Spring注解
 
-1.@controller、@restcontroller区别
+~~~java
+@controller
+@restcontroller
+
+@Configuration
+配置、启动spring容器，相对于之前spring配置文件中beans标签
+@Configuration+@Bean (@Configuration+@Componet)
+启动容器+注册Bean
 
 
+
+~~~
 
 
 
 ### Springboot集成logback、mdc日志打印追踪
 
+两种实现方式mdc日志追踪：拦截器、AOP
+
 理解类：
 
-1. HandlerInterceptorAdapter
-2. WebMvcConfigurer
+1. HandlerInterceptorAdapter类
+
+   SpringWebMVC框架拦截器类，用于请求前预处理、处理后的后处理。
+
+   应用场景：1. 日志处理 2. 权限检查，登陆检测  3. 性能监控
+
+2. WebMvcConfigurer接口
 
