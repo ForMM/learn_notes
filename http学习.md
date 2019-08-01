@@ -18,9 +18,11 @@
 
 2. HttpClient
 
-   第三方工具包。
-
-
+   第三方工具包。httpClient有多种版本，具体实现请求的方式有两种，一种是创建HttpClient接口，另一种创建CloseableHttpClient抽象类。
+   
+   
+   
+   
 
 
 
