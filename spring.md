@@ -14,9 +14,9 @@
 ## Spring注解
 
 ~~~java
-@controller
+@Controller
 @ResponseBody
-@restcontroller （指定返回类型为json）（相当于：@controller+@ResponseBody）
+@RestController （指定返回类型为json）（相当于：@controller+@ResponseBody）
 
 @Configuration  (配置、启动spring容器，相对于之前spring配置文件中beans标签)
 @Configuration+@Bean (启动容器+注册Bean)
