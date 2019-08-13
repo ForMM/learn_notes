@@ -54,3 +54,15 @@
 ### 返回结果类设计
 
 为了更好兼容各个客户端理解后端的返回结果，需要制定一个返回规范结果类Result。一般会设计成restful格式。也有很多平台会维护自己的一套返回码体系。
+
+
+
+### Spring AOP
+
+~~~
+ProceedingJoinPoint接口
+MethodSignature接口
+
+
+~~~
+
