@@ -25,10 +25,13 @@
 @Aspect  (声明一个切面类)
 @Pointcut("execution(public * com.example.demo.controller..*.*(..))")  （声明切入点）
 @Before("webLog()")   （方法执行前处理）
-@Around("webLog()")		（）
+@Around("webLog()")		（增强环绕）
 @After("webLog()")   （方法执行后处理）
 @AfterReturning(pointcut = "webLog()", returning = "ret")  （方法返回结果后执行）
-备注：日志打印请求路径、类型、参数可以在@Before注解方法中实现，也可以在@Around注解方法中实现
+@AfterThrowing(pointcut = "webLog()")		(方法执行异常)
+备注：日志打印请求路径、类型、参数可以在@Before注解方法中实现，也可以在@Around注解方法中实现。
+也可以用@Around实现@Before、@Around注解功能
+
 
 
 ~~~
