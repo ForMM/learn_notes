@@ -34,6 +34,37 @@
 
 
 
+~~~
+<dependencies>
+	<dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+</dependencies>
+<build>
+	<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+	</plugins>
+</build>
+
+~~~
+
+<dependencies>依赖jar包的标签，<build><plugins>依赖工具包。
+
+
+
 ### maven上传本地仓库及远程库
 
 ~~~shell
