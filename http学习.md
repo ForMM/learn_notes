@@ -20,6 +20,8 @@
 
    第三方工具包。httpClient有多种版本，具体实现请求的方式有两种，一种是创建HttpClient接口，另一种创建CloseableHttpClient抽象类。
    
+   注意：需要代理服务器的话，加上代理服务地址，再发送请求。
+   
    
    
    
