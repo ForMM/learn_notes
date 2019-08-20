@@ -44,6 +44,7 @@ git rm Git总结.md;  #从版本库中删除文件，若删除错了，用checko
 ssh-keygen -t rsa -C "linkeke_sea@163.com";  #本地生成ssh私钥、公钥，将公钥放到github上
 git remote add origin git@github.com:ForMM/learn_notes.git;  #关联远程仓库
 git push -u origin master;  #推送到远程仓库
+git pull upstream dev; #upstream远程仓库对应的名字
 
 #远程库克隆项目
 git clone git@github.com:ForMM/HelloBoy.git;  #克隆远程项目到本地
@@ -55,6 +56,8 @@ git checkout -b dev;  #创建分支并切换分支到dev,然后修改文件提�
 git checkout master;  #切换分支到master
 git merge dev;  #解决冲突，快速合并到master
 git branch -d dev;  #删除分支dev
+git update-index --assume-unchanged src/main/resources/application.properties; #忽略某个文件修改
+git update-index --no-assume-unchanged src/main/resources/application.properties; #解除忽略某个文件修改
 
 #解决冲突
 git log --graph --pretty=oneline --abbrev-commit;  #可以查看合并信息
