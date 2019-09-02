@@ -29,6 +29,18 @@ update  t_account set operate_type=1 where account='aaaaa';
 #在现有表添加联合索引
 ALTER TABLE t_account ADD INDEX idx_account_status (`account`,`status`); 
 
+~~~
+
+
+
+### 查询操作
+
+~~~mysql
+ #每日，每周，每月分组统计数据
+ select DATE_FORMAT(create_time,'%Y%m%d') days,count(id) count from t_account group by days; 
+ select DATE_FORMAT(create_time,'%Y%u') weeks,count(id) count from t_account group by weeks;  
+ select DATE_FORMAT(create_time,'%Y%m') months,count(id) count from t_account group by months; 
+
 
 
 ~~~
