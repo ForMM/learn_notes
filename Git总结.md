@@ -21,6 +21,9 @@ git commit -m “first time”;  #将暂存区文件提交到本地仓库
 #设置名字和邮箱，每次提交时都会跟踪名字和邮箱
 git config --global user.name "linkk"; 
 git config --global user.email "linkeke_sea@163.com";
+#设置每个库单独用户名和邮箱
+git config user.name linkeke_sea@163.com;
+git config user.email linkeke_sea@163.com;
 
 git status;  #查看当前仓库状态
 git diff readme.txt;  #查看文件的不同之处
