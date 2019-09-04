@@ -22,7 +22,7 @@
 MsgData<TestBody> data = JSON.parseObject(json,new TypeReference<MsgData<TestBody>>(){});
 ~~~
 
-
+TestBody类必须序列化
 
 
 
