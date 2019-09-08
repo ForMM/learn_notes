@@ -1,10 +1,43 @@
 # Java知识总结
 
-### java自定义注解
+### 注解
 
-注解：
+注解：可以理解为标签，可以在类、方法、属性都可以加上标签。
 
 元注解：
+
+~~~java
+@Documented
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+public @interface LogAnnotation {
+	String value() default "default";
+}
+
+@Documented //此注解包含在javadoc中
+@Target  //用在什么地方，ElementType.METHOD
+/**
+CONSTRUCTOR:构造器声明
+FIELD:域声明
+LOCAL_VARIABLE:局部变量声明
+METHOD:方法声明
+PACKAGE:包声明
+PARAMETER:参数说明
+TYPE:类、接口声明
+**/
+@Retention //需要在什么级别保存该注解信息
+/**
+SOURCE:注解将被编译器丢弃
+CLASS:注解在class文件中可用，但会被JVM丢弃
+RUNTIME:运行期也会保存该注解，通过反射机制可以读取注解信息
+**/
+@Inherited  //允许子类继承父类的注解
+~~~
+
+
+
+
 
 注解处理器：
 
