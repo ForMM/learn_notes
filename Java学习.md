@@ -63,5 +63,14 @@ TestBody类必须序列化
 
 
 
+#### Arrays类
+
+~~~
+Arrays.sort(T aa);
+Arrays.asList();
+Arrays.binarySearch(bb, "yy");
+Arrays.copyOf(aa, 9);
+~~~
+
 
 
