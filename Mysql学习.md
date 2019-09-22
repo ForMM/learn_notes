@@ -1,18 +1,40 @@
 # Mysql
 
+初次安装mysql，进入终端，进入/usr/local/mysql/bin目录，输入指令进入mysql指令操作界面：
+
+~~~shell
+./mysql -u root -p
+~~~
+
+依次输入安装时的密码就行。之后安装navicat客户端，当navicat版本不支持最新版mysql（8.0）加密方式，需要执行指令支持传统的密码加密。
+
+~~~shell
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+FLUSH PRIVILEGES;
+exit; ##退出编辑窗口
+~~~
+
+### 创建库
+
+~~~mysql
+CREATE DATABASE demo;
+~~~
+
 ### 创建表
 
 ~~~mysql
 #创建表，每个字段需要添加注释，表也要添加注释，索引也要创建好
-CREATE TABLE `t_account` (
-  `id` varchar(32) NOT NULL  COMMENT '主键',
-  `account` varchar(40) DEFAULT NULL COMMENT '账号',
+CREATE TABLE `d_account` (
+  `id` varchar(32) NOT NULL COMMENT 'uuid主键值',
+  `account` varchar(40) NOT NULL COMMENT '账号（唯一的标志）',
+  `email` varchar(100) DEFAULT NULL COMMENT '邮箱',
+  `status` tinyint(1) DEFAULT '0' COMMENT '审核状态，0未认证，1待审核，2审核通过，3审核不通过',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `status` TINYINT(1) DEFAULT 0 COMMENT '状态，0待审核，1已通过'
   PRIMARY KEY (`id`),
-  KEY `idx_account` (`account`),
+  KEY `idx_account` (`account`) USING BTREE,
+  KEY `idx_email` (`email`) USING BTREE,
   KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT '账号表',;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='账号表'
 ~~~
 
 

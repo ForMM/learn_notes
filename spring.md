@@ -69,3 +69,6 @@ MethodSignature接口
 
 ~~~
 
+### service层需要自行处理异常吗
+
+不需要涉及事务回滚的就处理异常，需要事务回滚的就抛出异常交给controller层处理
