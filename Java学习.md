@@ -49,6 +49,16 @@ RUNTIME:运行期也会保存该注解，通过反射机制可以读取注解信
 
 
 
+### java动态代理
+
+InvocationHandler接口和Proxy类实现动态代理。
+
+
+
+
+
+
+
 ### java工具类库
 
 #### fastjson 

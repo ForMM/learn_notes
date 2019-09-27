@@ -141,3 +141,13 @@ pom.xml文件所在的目录执行如下命令:
 mvn mybatis-generator:generate
 ~~~
 
+
+
+### mybatis sqlsession理解
+
+
+
+### mybatis拦截器理解
+
+创建拦截器需要实现Interceptor接口，需要重写intercept接口、plugin接口。
+

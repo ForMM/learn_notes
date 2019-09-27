@@ -44,6 +44,9 @@ CREATE TABLE `d_account` (
 ~~~mysql
 #原有表新增一列
 alter table t_account add column operate_type tinyint(2) DEFAULT '0' COMMENT '操作类型，1代表更新，0新增'; 
+#原有表新增多列
+ALTER TABLE t_account ADD COLUMN company_name VARCHAR (100) DEFAULT NULL COMMENT '企业名称',
+ ADD COLUMN license_no VARCHAR (100) DEFAULT NULL COMMENT '企业组织代码';
 
 #更新数据
 update  t_account set operate_type=1 where account='aaaaa';
