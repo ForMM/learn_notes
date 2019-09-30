@@ -145,9 +145,15 @@ mvn mybatis-generator:generate
 
 ### mybatis sqlsession理解
 
+```css
 
+```
 
 ### mybatis拦截器理解
 
 创建拦截器需要实现Interceptor接口，需要重写intercept接口、plugin接口。
 
+1.Executor (update, query, flushStatements, commit, rollback, getTransaction, close, isClosed) 拦截执行器的方法；
+2.ParameterHandler (getParameterObject, setParameters) 拦截参数的处理；
+3.ResultSetHandler (handleResultSets, handleOutputParameters) 拦截结果集的处理；
+4.StatementHandler (prepare, parameterize, batch, update, query) 拦截Sql语法构建的处理
