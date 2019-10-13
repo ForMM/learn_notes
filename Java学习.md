@@ -82,5 +82,34 @@ Arrays.binarySearch(bb, "yy");
 Arrays.copyOf(aa, 9);
 ~~~
 
+#### java源码学习记录
+
+~~~java
+java.lang
+Object
+#native方法
+	registerNatives()
+  getClass()
+  hashCode()
+  clone()
+equal(Object o)
+toString()
+notify()
+notifyAll()
+wait(long timeout)
+wait(long timeout,int nanos)
+wait()
+finalize()
+
+String
+
+
+
+
+
+~~~
+
+
+
 
 
