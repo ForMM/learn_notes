@@ -4,8 +4,6 @@
 
 hotspot
 
-
-
 ### 自动内存管理机制
 
 #### 1.java内存区域
@@ -21,17 +19,25 @@ StackOverflowError
 OutOfMemoryError
 ~~~
 
-本地方法栈：
+本地方法栈：hotspot虚拟机把虚拟机栈和本地方法栈是弄在一起的
 
-堆：存放对象实例、数组
+堆：存放对象实例、数组，堆内存由年轻代和老年代组成，年轻代分为一个Eden区和两个Survivor区（使用复制收集算法） 
+
+ ![img](https://images2017.cnblogs.com/blog/483385/201801/483385-20180109093559488-1322952384.png) 
 
 程序计数器：
 
 #### 2.异常
 
-内存溢出：
+内存溢出：程序运行过程中无法申请足够的内存导致的一种错误。
 
-内存泄露：
+内存泄露：程序中有些对象不会被GC回收，始终占用内存。即被分配的对象引用链可达但已无用。
+
+#### 3.什么样代码产生内存溢出
+
+~~~
+
+~~~
 
 
 
@@ -48,6 +54,20 @@ OutOfMemoryError
 ### 多线程并发的实现原理
 
 
+
+### 常用指令
+
+~~~shell
+top     #查系统消耗高的进程
+top –H –p  #pid#   根据pid查出进程中子进程
+jstack #进程pid# | grep #子线程pid(16)位#    查看占用cpu高的子线程
+jmap –heap #pid#     查看堆信息，可以看到堆使用情况和jvm配置参数
+jstat –gc #pid#    查看内存使用情况 JVM的GC情况
+jmap –dump:format=b,file=/tmp/20190708.hprof #pid#     生成当前jvm内存快照  用于后续分析
+jmap –histo:live #pid#     打印每个类的实例数量  内存占用信息  加上live可以手工触发一次fullGC
+jstat –gcutil #pid#   查看内存使用百分比，jvm GC情况
+jinfo –flags #pid#    可以查看当前进程JVM的所有配置信息
+~~~
 
 
 
