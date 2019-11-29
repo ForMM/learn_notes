@@ -39,9 +39,11 @@ CREATE TABLE `d_account` (
 
 
 
-### 表更新操作
+### 表添加更新操作
 
 ~~~mysql
+#插入数据
+INSERT INTO t_account(account,email,status,create_time) VALUES('65333@qq.com','65333@qq.com','1','');
 #原有表新增一列
 alter table t_account add column operate_type tinyint(2) DEFAULT '0' COMMENT '操作类型，1代表更新，0新增'; 
 #原有表新增多列
