@@ -1,15 +1,4 @@
-Spring框架学习
-
-通过写接口方式，学习平时用到的工具类。
-
-1. freemarker制作DOCX模版填充自定义内容输出PDF
-2. oss|cos等混合云（阿里云、腾讯云、微软云、华为云）上传工具类
-3. 微信、支付宝刷脸人脸识别接口
-4. 微信、支付宝支付接口
-5. 对称加密（sha1 sha256 AES等）加密工具类，设计简单的摘要计算方法
-6. http请求工具类
-
-
+### Spring框架学习
 
 ## Spring注解
 
@@ -52,14 +41,6 @@ Spring框架学习
 
 2. WebMvcConfigurer接口
 
-
-
-### 返回结果类设计
-
-为了更好兼容各个客户端理解后端的返回结果，需要制定一个返回规范结果类Result。一般会设计成restful格式。也有很多平台会维护自己的一套返回码体系。
-
-
-
 ### Spring AOP
 
 ~~~
@@ -69,9 +50,7 @@ MethodSignature接口
 
 ~~~
 
-### service层需要自行处理异常吗
 
-不需要涉及事务回滚的就处理异常，需要事务回滚的就抛出异常交给controller层处理
 
 ### Spring事务
 
@@ -96,6 +75,28 @@ MethodSignature接口
 虚读：一个事务读到了另一个事务已经提交的insert的数据导致多次查询结果不一致
 
 ##### 解决读问题：设置事务隔离级别
+
+
+
+### 深入了解Spring 
+
+spring结构主要有：
+
+spring core container: spring-beans、spring-core、spring-context、spring-expression
+
+spring aop：
+
+spring jdbc:
+
+spring web:
+
+spring test:
+
+#### spring Ioc/Di（控制反转/依赖注入）
+
+Ioc/Di是一种设计理念，利用容器管理Bean的注入，解决Bean之间的依赖关系。
+
+核心类BeanFactory工厂类来注入bean。指定bean采用注解或XML配置文件。
 
 
 

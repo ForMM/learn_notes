@@ -14,6 +14,31 @@ FLUSH PRIVILEGES;
 exit; ##退出编辑窗口
 ~~~
 
+#### 忘记数据库密码修改密码
+
+~~~
+顺序执行命令（第一个cmd窗口）：
+cd C:\Program Files\MySQL\MySQL Server 8.0\bin  （window可以在目录栏输入cmd，按下enter键）
+net stop mysql
+mysqld --console --skip-grant-tables --shared-memory
+
+顺序执行命令（第二个窗口）
+mysql -u root -p
+//不输入密码直接回车
+use mysql
+update user set authentication_string='' where user='root';
+quit
+
+关闭窗口1；打开第三个窗口：
+net start mysql
+cd C:\Program Files\MySQL\MySQL Server 8.0\bin
+mysql -u root -p   
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'root2019';
+
+~~~
+
+
+
 ### 创建库
 
 ~~~mysql

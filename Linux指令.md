@@ -38,3 +38,24 @@ zgrep -a 1aaa55a574494903ad0ee6b273df59f7  /app/full/logs/aa.log.2019-05-17.tar.
 
 ~~~
 
+#### linux安装配置java
+
+~~~shell
+mkdir /usr/java
+cd /usr/java
+(jdk tar包放到此目录)
+tar -zxvf jdk-8u151-linux-x64.tar.gz
+vi /etc/profile
+
+#添加如下内容：
+export JAVA_HOME=/usr/java/jdk1.8.0_162
+export JRE_HOME=${JAVA_HOME}/jre
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib:$CLASSPATH
+export JAVA_PATH=${JAVA_HOME}/bin:${JRE_HOME}/bin
+export PATH=$PATH:${JAVA_PATH}
+
+source /etc/profile   （重新加载环境变量）
+~~~
+
+
+
