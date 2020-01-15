@@ -55,9 +55,11 @@ InvocationHandler接口和Proxy类实现动态代理。
 
 
 
+#### java运行外部依赖的jar
 
-
-
+~~~shell
+java -Djava.ext.dirs=$JAVA_HOME/jre/lib/ext;d:\tmp\lib -jar d:\tmp\contract-base.jar
+~~~
 
 ### java工具类库
 

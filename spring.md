@@ -100,5 +100,15 @@ Ioc/Di是一种设计理念，利用容器管理Bean的注入，解决Bean之间
 
 
 
+#### spring aop
+
+通过代理模式为目标对象生成代理对象，并将横切逻辑插入到目标方法执行的前后。
+
+
+
+#### spring mvc
+
+mvc的核心类是dispatchservlet
+
 
 
