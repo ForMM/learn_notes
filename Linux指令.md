@@ -8,13 +8,24 @@ df -h;(查看磁盘情况)
 free -m;(查看内存使用量和交换区使用量)
 ~~~
 
+### 查看端口占用
 
+~~~shell
+netstat -tunlp | grep 8080;
+##或者
+lsof -i 8080;
+
+##-R 是指级联应用到目录里的所有子目录和文件,777 是所有用户都拥有最高权限
+sudo chmod -R 777 某一目录;
+~~~
 
 ### 文件相关命令
 
 ~~~shell
 whereis svn;(查看文件安装路径)
 which svn;(查看运行文件路径)
+
+yum install -y unzip zip;(安装zip软件)
 
 find /app/image/temp/ -name upload_7445edec.tmp;(查找文件，第一个目录，第二个文件名)
 

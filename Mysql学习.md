@@ -1,5 +1,66 @@
 # Mysql
 
+### linux安装mysql1.8
+
+~~~shell
+#查询系统是否安装了mysql
+rpm -qa |grep -i mysql
+
+#查找mysql对应的文件夹（二选一）
+whereis mysql
+find / -name mysql
+
+#卸载并删除MySQL安装的组键服务
+rpm -ev mysql80-community-release-el8-1.noarch
+
+#删除系统中MySQL的所有文件夹
+rm -rf /usr/share/mysql
+rm -rf /usr/lib64/mysql
+rm -rf /usr/bin/mysql
+rm -rf /etc/selinux/targeted/active/modules/100/mysql
+
+rpm -qa|grep mysql;
+cd /usr/local/src/;
+wget https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm;
+rpm -ivh mysql80-community-release-el7-1.noarch.rpm;
+yum install -y mysql-server;
+systemctl start mysqld;
+yum clean all;
+rpm --rebuilddb;
+yun update;
+systemctl start mysqld;
+cat /var/log/mysqlld.log;
+systemctl enable mysqld;
+mysql -u root -p;
+
+create user 'keke'@'%' identified by 'asdf1234';
+grant all on *.* to 'keke'@'%' with grant option;
+ALTER USER 'keke'@'%' IDENTIFIED WITH mysql_native_password BY 'asdf1234';
+select user,host from mysql.user;
+
+##
+GRANT语法：   
+   GRANT 权限 ON 数据库.* TO 用户名@'登录主机' IDENTIFIED BY '密码'
+权限：
+   ALL,ALTER,CREATE,DROP,SELECT,UPDATE,DELETE
+   新增用户：权限为USAGE,即为："无权限",想要创建一个没有权限的用户时,可以指定USAGE
+数据库：
+     *.*              表示所有库的所有表
+     mylove.*         表示mylove库的所有表
+     mylove.loves     表示mylove库的loves表 
+用户名：
+     MySQL的账户名
+登陆主机：
+     允许登陆到MySQL Server的客户端ip
+     '%'表示所有ip
+     'localhost' 表示本机
+     '10.155.123.55' 特定IP
+密码：
+      MySQL的账户名对应的登陆密码
+~~~
+
+
+
 初次安装mysql，进入终端，进入/usr/local/mysql/bin目录，输入指令进入mysql指令操作界面：
 
 ~~~shell
@@ -14,7 +75,7 @@ FLUSH PRIVILEGES;
 exit; ##退出编辑窗口
 ~~~
 
-#### 忘记数据库密码修改密码
+### 忘记数据库密码修改密码
 
 ~~~
 顺序执行命令（第一个cmd窗口）：
@@ -74,6 +135,9 @@ alter table t_account add column operate_type tinyint(2) DEFAULT '0' COMMENT '�
 #原有表新增多列
 ALTER TABLE t_account ADD COLUMN company_name VARCHAR (100) DEFAULT NULL COMMENT '企业名称',
  ADD COLUMN license_no VARCHAR (100) DEFAULT NULL COMMENT '企业组织代码';
+
+#更新表字段长度
+ALTER TABLE t_account MODIFY COLUMN company_name varchar(40);
 
 #更新数据
 update  t_account set operate_type=1 where account='aaaaa';

@@ -34,6 +34,20 @@
 
 
 
+~~~xml
+ <dependency>
+            <groupId>ICEPDF</groupId>
+            <artifactId>core</artifactId>
+            <version>6.1.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/icepdf-core.jar</systemPath>
+        </dependency>
+~~~
+
+场景：依赖本地第三方jar
+
+
+
 ~~~
 <dependencies>
 	<dependency>
