@@ -42,6 +42,8 @@ CREATE TABLE `d_account` (
 ### 表更新操作
 
 ~~~mysql
+#更新表名
+ALTER TABLE t_course RENAME t_zq_course;
 #原有表新增一列
 alter table t_account add column operate_type tinyint(2) DEFAULT '0' COMMENT '操作类型，1代表更新，0新增'; 
 #原有表新增多列
