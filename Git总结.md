@@ -29,6 +29,10 @@ git status;  #查看当前仓库状态
 git diff readme.txt;  #查看文件的不同之处
 git rm --cached Git总结.md;  #将Git总结.md文件暂存区删除掉
 
+#git的用户名和密码过期或者需要修改
+git config --system --unset credential.helper;
+git pull;#就会弹出输入用户名和密码的窗口
+
 #版本回退
 git log;  #提交日志记录
 git reset --hard HEAD^;  #回退到上一个版本
