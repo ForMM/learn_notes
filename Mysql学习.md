@@ -128,6 +128,8 @@ CREATE TABLE `d_account` (
 ### 表添加更新操作
 
 ~~~mysql
+#更新表名
+ALTER TABLE t_course RENAME t_zq_course;
 #插入数据
 INSERT INTO t_account(account,email,status,create_time) VALUES('65333@qq.com','65333@qq.com','1','');
 #原有表新增一列

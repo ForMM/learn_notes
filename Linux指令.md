@@ -50,7 +50,7 @@ zgrep -a 1aaa55a574494903ad0ee6b273df59f7  /app/full/logs/aa.log.2019-05-17.tar.
 
 ~~~
 
-#### linux安装配置java
+### linux安装配置java
 
 ~~~shell
 mkdir /usr/java
@@ -84,5 +84,23 @@ source /etc/profile   （重新加载环境变量）
  
  #查看系统字体
  fc-list
+=======
+### mac操作远程服务器
+
+​~~~shell
+#连接服务器
+ssh root@192.168.100.100
+
+#上传文件
+scp /path/filename root@192.168.100.100:/path
+
+#从服务器上下载文件
+scp username@servername:/path/filename /Users/mac/Desktop（本地目录）
+
+#上传目录到服务器
+scp -r local_dir username@servername:remote_dir
+
+#从服务器下载整个目录
+scp -r username@servername:/root/（远程目录） /Users/mac/Desktop（本地目录）
 ~~~
 

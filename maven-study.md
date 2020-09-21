@@ -48,7 +48,7 @@
 
 
 
-~~~
+~~~xml
 <dependencies>
 	<dependency>
         <groupId>org.springframework.boot</groupId>
@@ -76,6 +76,26 @@
 ~~~
 
 <dependencies>依赖jar包的标签，<build><plugins>依赖工具包。
+
+
+
+### springboot打包外部依赖包
+
+~~~xml
+<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources/lib</directory>
+				<targetPath>BOOT-INF/lib/</targetPath>
+				<includes>
+					<include>**/*.jar</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<targetPath>BOOT-INF/classes/</targetPath>
+			</resource>
+		</resources>
+~~~
 
 
 
