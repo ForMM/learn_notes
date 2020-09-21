@@ -4,6 +4,7 @@
 
 ~~~shell
 uname -a;(查看系统信息)
+head -n 1 /etc/issue  # 查看操作系统版本
 df -h;(查看磁盘情况)
 free -m;(查看内存使用量和交换区使用量)
 ~~~
@@ -69,4 +70,19 @@ source /etc/profile   （重新加载环境变量）
 ~~~
 
 
+
+#### 安装查看字体库
+
+~~~shell
+ #安装字体
+ yum -y install fontconfig kde-filesystem
+ yum -y install kde-i18n-Chinese
+ wget http://139.219.12.193:18080/pkg/default/TrueType.tar
+ mkdir -p /usr/share/fonts/chinese/
+ tar -xvf TrueType.tar -C /usr/share/fonts/chinese/
+ fc-cache -v
+ 
+ #查看系统字体
+ fc-list
+~~~
 
