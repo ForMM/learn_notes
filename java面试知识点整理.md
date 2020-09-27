@@ -188,16 +188,12 @@ redis为什么执行这么快？
 	2. 单线程操作，不需要切换上下文
 	3. 非阻塞IO多路复用机制
 	
-
-
-
-
-
-
-
 集群
+	主从模式
+	哨兵模式
+	cluster分布式模式
+	
 https://blog.csdn.net/miss1181248983/article/details/90056960
-
 
 redis支持lua脚本（项目中通过这个实现限流）
 
