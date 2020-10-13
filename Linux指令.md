@@ -69,9 +69,7 @@ export PATH=$PATH:${JAVA_PATH}
 source /etc/profile   （重新加载环境变量）
 ~~~
 
-
-
-#### 安装查看字体库
+### 安装查看字体库
 
 ~~~shell
  #安装字体
@@ -84,10 +82,12 @@ source /etc/profile   （重新加载环境变量）
  
  #查看系统字体
  fc-list
-=======
-### mac操作远程服务器
+~~~
 
-​~~~shell
+### mac连接远程服务器
+
+~~~shell
+### mac操作远程服务器
 #连接服务器
 ssh root@192.168.100.100
 
@@ -103,4 +103,22 @@ scp -r local_dir username@servername:remote_dir
 #从服务器下载整个目录
 scp -r username@servername:/root/（远程目录） /Users/mac/Desktop（本地目录）
 ~~~
+
+### 查看线程的命令
+
+~~~shell
+top; 查看系统内存情况
+top -p pid;查看指定进程id的内存情况
+ps -ef|grep pid;查看线程具体情况
+
+~~~
+
+### 穿透工具
+
+~~~
+路径：/usr/proxyy
+nohup ./GoProxyServer &
+~~~
+
+
 
