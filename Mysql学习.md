@@ -33,6 +33,9 @@ cat /var/log/mysqlld.log;
 systemctl enable mysqld;
 mysql -u root -p;
 
+查看密码强度
+show variables like 'validate_password%';
+
 create user 'keke'@'%' identified by 'asdf1234';
 grant all on *.* to 'keke'@'%' with grant option;
 ALTER USER 'keke'@'%' IDENTIFIED WITH mysql_native_password BY 'asdf1234';
