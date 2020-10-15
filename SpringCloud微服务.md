@@ -19,7 +19,6 @@ springcloud相关组件：
 ~~~
 
 
-
 #### IDEA创建springcloud多模块项目
 
 ~~~
@@ -55,5 +54,36 @@ springcloud相关组件：
         <version>1.0-SNAPSHOT</version>
     </parent>
     
+
+
+
+~~~
+
+#### 常用注解
+
+~~~java
+常用注解：
+
+@SpringCloudApplication
+@EnableDiscoveryClient
+@EnableApolloConfig
+@EnableHystrix
+@EnableHystrixDashboard
+@EnableFeignClients(basePackages = {"com.kk", "application"})
+@ComponentScan(basePackages = {"com.kk", "application"})
+@EnableTransactionManagement(
+        order = Integer.MAX_VALUE - 1
+)
+public class VertApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(VertApplication.class, args);
+    }
+}
+
+
+/**
+@EnableDiscoveryClient
+服务注册到注册中心
+**/
 ~~~
 
