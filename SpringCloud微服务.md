@@ -18,3 +18,31 @@ springcloud相关组件：
 
 ~~~
 
+常用注解：
+
+~~~java
+@SpringCloudApplication
+@EnableDiscoveryClient
+@EnableApolloConfig
+@EnableHystrix
+@EnableHystrixDashboard
+@EnableFeignClients(basePackages = {"com.fadada", "application"})
+@ComponentScan(basePackages = {"com.fadada", "application"})
+@EnableTransactionManagement(
+        order = Integer.MAX_VALUE - 1
+)
+public class VertApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(VertApplication.class, args);
+    }
+}
+
+
+/**
+@EnableDiscoveryClient
+服务注册到注册中心
+**/
+
+
+~~~
+
