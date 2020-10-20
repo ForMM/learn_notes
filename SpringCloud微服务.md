@@ -101,3 +101,9 @@ public class VertApplication {
   
 ~~~
 
+### 服务调用Feign
+
+~~~
+
+~~~
+
