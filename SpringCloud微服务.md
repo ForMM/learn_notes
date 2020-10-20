@@ -11,7 +11,7 @@ springcloud相关组件：
 	日志链路跟踪：Sleuth
 	负载均衡：Ribbon
 	服务熔断器：Hystrix
-	服务网关：Zuul
+	服务网关：Zuul gateway
 	配置中心：appllo
 	
 
@@ -87,15 +87,8 @@ public class VertApplication {
 **/
 ~~~
 
-
-
-#### 注册中心Eureka
-
 ~~~
-分布式系统的CAP理论：
-  一致性（C）：所有节点上的数据时刻保持同步
-  可用性（A）：每个请求都能收到一个结果，不管是成功或者失败
-  分区容错性（P）：系统应该能持续提供服务，即使内部有消息丢失
+
   
   
   
@@ -106,4 +99,44 @@ public class VertApplication {
 ~~~
 
 ~~~
+
+### Eureka
+
+~~~
+分布式系统的CAP理论：
+  一致性（C）：所有节点上的数据时刻保持同步
+  可用性（A）：每个请求都能收到一个结果，不管是成功或者失败
+  分区容错性（P）：系统应该能持续提供服务，即使内部有消息丢失
+
+注册中心Eureka
+	Eureka包括两个组件：Eureka server和Eureka client
+
+    Eureka server提供服务注册服务，各个节点启动后，会在Eureka server中进行注册，Eureka server就会存	储所有可用的服务节点。Eureka server本身也是一个服务，搭建单机版的Eureka server注册中心，需要配置取消Eureka server的自动注册逻辑。
+    Eureka server通过Register、Get、Renew等接口提供服务的注册、发现、心跳检测等服务。
+    
+    Eureka client是一个java客户端，同时也是一个内置的、使用轮询负载算法的负载均衡器。向Eureka server发送心跳，默认周期30秒。如果Eureka server在多个心跳周期内没有接收到某个服务的心跳，将会从中心移除掉这个节点，默认周期90秒。
+    
+
+	搭建单机版Eureka server
+	
+	搭建集群版Eureka server
+	
+	Eureka server安全认证
+	
+	
+	
+
+~~~
+
+#### 熔断与降级
+
+~~~
+熔断：分布式系统中，某个A服务由于自身原因或网络引起的不能服务，然后系统自动断开A服务的请求。防止雪崩。
+降级：解决资源不足和访问增加，整个系统负荷增加可能触发降级
+
+触发条件不一样：熔断是某个服务引起的，降级是系统整体负荷考虑
+处理目标不一样：熔断是处理某个服务，降级是对一个业务层的系统处理（一般先从最外层开始降级）
+
+~~~
+
 
