@@ -79,7 +79,7 @@ JVM堆主要分为新时代、老年代、元空间（jdk1.7称为永久代）�
 s1）。新生代和老年代的大小比例（1:2）新生代中区域比例（8：1：1）
 eden区存放new或newinstance的对象。s0和s1一样大。
 第一次GC（yong GC 或 minor GC）: 
-1. 第一次GC时s0\s1区是空的，此时将其中一个s0作为存放eden区GC后不能回归的对象。
+1. 第一次GC时s0\s1区是空的，此时将其中一个s0作为存放eden区GC后不能回收的对象。
 2. 当eden区GC不能回收的对象沾满了s0区，不能回收的对象就转到老年代区。
 3. 清空eden区，此时s1为空。就把s1作为eden区GC后不能回收的对象存放点。
 第二次GC
@@ -139,7 +139,32 @@ JDK1.8
 线程池的实现原理
 
 ~~~
-
+public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue,
+                              RejectedExecutionHandler handler)
+                              
+1. 主要参数
+ 	核心线程数：提交一个任务，线程池创建一个新线程执行任务，直到当前线程数等于corePoolSize；如果继续提交的任务被保存到阻塞队列，等待被执行。
+ 	最大线程数：
+ 	线程空闲时的存活时间：
+ 	线程空闲时的存活时间单位：
+ 	任务队列：
+ 	(1) ArrayBlockingQueue：基于数组结构的有界阻塞队列，按FIFO排序任务； 
+	(2) LinkedBlockingQuene：基于链表结构的阻塞队列，按FIFO排序任务，吞吐量通常高于ArrayBlockingQuene； 
+	(3) SynchronousQuene：一个不存储元素的阻塞队列，每个插入操作必须等到另一个线程调用移除操作，否则插入	操作一直处于阻塞状态，吞吐量通常要高于LinkedBlockingQuene； 
+	(4) priorityBlockingQuene：具有优先级的无界阻塞队列；
+ 	拒绝策略：
+ 	AbortPolicy：直接抛出异常，默认策略；
+	CallerRunsPolicy：用调用者所在的线程来执行任务；
+	DiscardOldestPolicy：丢弃阻塞队列中靠最前的任务，并执行当前任务；
+	DiscardPolicy：直接丢弃任务； 
+	当然也可以根据应用场景实现RejectedExecutionHandler接口，自定义饱和策略，如记录日志或持久化存储不能处理的任务
+	
+2. 关闭线程池
+	
 ~~~
 
 
