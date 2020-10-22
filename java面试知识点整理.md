@@ -164,6 +164,13 @@ public ThreadPoolExecutor(int corePoolSize,
 	当然也可以根据应用场景实现RejectedExecutionHandler接口，自定义饱和策略，如记录日志或持久化存储不能处理的任务
 	
 2. 关闭线程池
+	shutdownNow() 和 shoutdown()
+	shutdownNow:线程池拒绝接收新任务，同时立马关闭线程池，线程池里的任务不再执行
+	shoutdown：线程池拒绝接收新任务，同时等待线程池里的任务执行完毕后再关闭线程池
+	
+	关闭线程池的方式有：
+	shutdownNow方式，一定要对任务里进行异常捕获
+    shoutdown方式，awaitTermination方法来阻塞等待
 	
 ~~~
 
@@ -326,4 +333,10 @@ Spring
 8、Hashmap怎么实现扩容的，对象是怎么删除的
 
 9、elastic怎么创建索引的
+
+大唐电力：
+
+html + css + javascript + vue+ Spring Boot+Spring cloud + hibernate + Spring+rocket Mq+Redis+Es + linux + oracle
+
+
 
