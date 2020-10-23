@@ -32,7 +32,7 @@ springcloud相关组件：
 2.构建子模块
 模块项目创建于主工程之内，创建过程如下：
     右键点击项目名称-->New-->Module
-    选中Spring Initializr-->Next
+    选中Spring Initializr（maven）-->Next
     -->Group={主工程的GroupId}-->Aritifact={当前模块的ArtifactId}、
 	-->Next-->Next-->Finish
 	
@@ -58,6 +58,60 @@ springcloud相关组件：
 
 
 ~~~
+
+#### springboot重点知识
+
+~~~
+1、springboot的核心注解
+	@SpringBootApplication 启动类的注解；这个注解组合了@SpringBootConfiguration
+@EnableAutoConfiguration @ComponentScan的注解。
+	@SpringBootConfiguration：@Configuration ;相当于传统的xml配置文件
+	@EnableAutoConfiguration：开启自动配置，根据依赖的jar包自动配置项目。比如：配置tomcat、加载web.xml文件、mvc插件等。
+	@ComponentScan：自动发现扫描组件，扫描到@Service、@Controller、@Component等这些注解，并注册为bean。
+	@ResponseBody:返回结果写入HTTP response body，一般把json数据写入
+	@Controller:控制器负责将用户发来的URL请求转发到对应的服务接口（service层）
+	@RestController:@ResponseBody和@Controller的合集
+	@RequestMapping:提供路由信息，负责URL到Controller中的具体函数的映射
+	@Import:用来导入其他配置类
+	@ImportResource:用来加载xml配置文件
+	@Autowired:自动导入依赖的bean
+	@Service:修饰service层的组件
+	@Repository:确保DAO或者repositories提供异常转译；被ComponetScan发现并配置
+	@Bean:用@Bean标注方法等价于XML中配置的bean
+	@Value：注入Spring boot application.properties配置的属性的值
+	@Component：泛指组件，当组件不好归类的时候，我们可以使用这个注解进行标注
+	@Configuration：标明为配置类
+	
+2、springboot的自动配置原理
+	springboot项目中启动类必须设置@SpringBootApplication注解，这个包含@SpringBootConfiguration
+@EnableAutoConfiguration @ComponentScan的注解
+	@SpringBootConfiguration使用了@Configuration注解，@EnableAutoConfiguration注解使用了@Import注解，@Import导入EnableAutoConfigurationImportSelector.class类。这个类就来处理需要自动配置的类，配置类的信息在META-INF/spring.factories文件中。
+	@Configuration：标明为配置类
+	@EnableConfigurationProperties(HttpEncodingProperties.class)声明开启属性注入
+	@ConditionalOnClass(CharacterEncodingFilter.class)当CharacterEncodingFilter在类路径的条	件下
+	@ConditionalOnProperty(prefix = “spring.http.encoding”, value = “enabled”, 				matchIfMissing = true)当spring.http.encoding=enabled的情况下，如果没有设置则默认为true，即条件符合
+	@ConditionalOnMissingBean当容器中没有这个Bean时新建Bean
+
+3、springboot如何使用xml配置
+	@Configuration和@ImportResource 配置即可,location传入的是一个字符串数组,所以可以传入多个xml配	置.
+	如：@ImportResource(locations = {"classpath:beans.xml"})
+	
+4、springboot核心配置文件
+	application 和 bootstrap 文件；
+	bootstrap 配置文件是系统级别的，用来加载外部配置，如配置中心的配置信息，也可以用来定义系统不会变化的属	性.bootstatp 文件的加载先于application文件；
+	application 配置文件是应用级别的，是当前应用的配置文件；
+	
+5、springboot的启动原理
+	
+
+
+
+
+
+
+~~~
+
+
 
 #### 常用注解
 
