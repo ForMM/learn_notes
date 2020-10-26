@@ -317,9 +317,74 @@ Hashmap里的元素是无序的，有序的Map有LinkedHashMap和TreeMap；他�
 
 ~~~
 
+单例设计模式
 
+~~~
+
+~~~
 
 Spring 
+
+~~~
+参考地址：https://zhuanlan.zhihu.com/p/29344811
+				https://www.jianshu.com/p/1dec08d290c1
+spring ioc的实现原理
+	控制反转：有一个依赖关系，从最上层往最下层找出依赖链，从最底层往上一步一步new对象。这个过程交给第三方容器来实现。
+	ioc指spring ioc container，包括beans、core、context、spel。
+	功能是bean的创建、注册、存储、销毁等
+	重点接口和类：BeanFactory、ApplicationContext、WebApplicationContext、Beanfinition、BeandefinitionRegistry
+	bean生命周期：实例化、设置属性值、初始化、销毁；BeanPostProcessor接口和InstantiationAwareBeanPostProcessor接口来实现。
+	容器启动过程：
+		1、web容器（tomcat）提供一个上下文环境，就是ServletContext
+		2、web.xml文件中提供contextLoaderListener，容器启动时触发初始化事件，这个类监听到了此事件就会调用contextInitialized，在这个方法中会初始化一个启动上下文（WebApplicationContext）。然后读取xml文件中bean的配置保存到ServletContext中。
+		
+		<listener>  
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>  
+    </listener>
+    <context-param>  
+        <param-name>contextConfigLocation</param-name>  
+        <param-value>classpath:spring/applicationContext.xml</param-value>  
+    </context-param>  
+    
+    3、初始化servlet，也将其存到ServletContext中。
+    <servlet>  
+        <servlet-name>DispatcherServlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>  
+        <init-param>  
+            <param-name>contextConfigLocation</param-name>  
+            <param-value>classpath:spring/dispatcher-servlet.xml</param-value>  
+        </init-param>  
+        <load-on-startup>1</load-on-startup>
+    </servlet>  
+    <servlet-mapping>  
+        <servlet-name>DispatcherServlet</servlet-name>  
+        <url-pattern>/</url-pattern> 
+    </servlet-mapping>  
+		
+	bean加载过程：
+		1、加载存储介质中的xml文件到Resource中
+		2、BeanDefinitionReader读取Resource所指向的配置文件资源，然后解析配置文件。配置文件中每一个<bean>解析成一个BeanDefinition对象，并保存到BeanDefinitionRegistry中
+		3、容器扫描BeanDefinitionRegistry中的BeanDefinition，使用Java的反射机制自动识别出Bean工厂后处理后器（实现BeanFactoryPostProcessor接口）的Bean，然后调用这些Bean工厂后处理器对BeanDefinitionRegistry中的BeanDefinition进行加工处理。主要完成以下两项工作：
+1）对使用到占位符的<bean>元素标签进行解析，得到最终的配置值，这意味对一些半成品式的BeanDefinition对象进行加工处理并得到成品的BeanDefinition对象；
+2）对BeanDefinitionRegistry中的BeanDefinition进行扫描，通过Java反射机制找出所有属性编辑器的Bean（实现java.beans.PropertyEditor接口的Bean），并自动将它们注册到Spring容器的属性编辑器注册表中（PropertyEditorRegistry）；
+		4、Spring容器从BeanDefinitionRegistry中取出加工后的BeanDefinition，并调用InstantiationStrategy着手进行Bean实例化的工作；
+		5、在实例化Bean时，Spring容器使用BeanWrapper对Bean进行封装，BeanWrapper提供了很多以Java反射机制操作Bean的方法，它将结合该Bean的BeanDefinition以及容器中属性编辑器，完成Bean属性的设置工作
+		6、利用容器中注册的Bean后处理器（实现BeanPostProcessor接口的Bean）对已经完成属性设置工作的Bean进行后续加工，直接装配出一个准备就绪的Bean。
+	
+~~~
+
+​		![v2-84ac79b31d7f08a12edf595df5e787ea_1440w](./v2-84ac79b31d7f08a12edf595df5e787ea_1440w.jpg)
+
+#### Spring aop
+
+1. 什么是spring aop？
+2. Spring AOP的关注点和横切关注点有什么区别？
+3. Spring有哪些不同的通知类型
+4. Spring aop的代理是什么
+5. 引介、连接点、切入点、织入是什么
+6. 源码分析
+
+
 
 湖南兴盛优选的面试点：
 

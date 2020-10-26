@@ -61,7 +61,7 @@ springcloud相关组件：
 
 #### springboot重点知识
 
-~~~
+~~~java
 1、springboot的核心注解
 	@SpringBootApplication 启动类的注解；这个注解组合了@SpringBootConfiguration
 @EnableAutoConfiguration @ComponentScan的注解。
@@ -102,14 +102,42 @@ springcloud相关组件：
 	application 配置文件是应用级别的，是当前应用的配置文件；
 	
 5、springboot的启动原理
-	
+		@SpringBootApplication
+    public class CommonConfigApplication {
+      public static void main(String[] args) {
+        SpringApplication.run(CommonConfigApplication.class, args);
+      }
+    }
 
-
-
-
-
-
+  a、SpringApplication.run方法
+  b、创建监听器springApplicationRunListeners
+  c、加载ConfiguableEnviroment配置环境
+  d、把Enviroment放到监听器中
+  e、创建run方法返回的ConfigureApplicationContext应用上下文
+  f、prepareContext()将监听器、配置环境等关联
+  g、refreshContext()自动化配置（跟自动化配置原理一样）
+    
+ 6、如何禁用指定的自动配置类
+    @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
+    
+ 7、Spring boot actuator监听器
+    运行状态监控的功能；使用时倒入spring-boot-starter-actuator的依赖即可
+		
+ 8、springboot手动和自动注入bean
+    手动注入：实现ApplicationContextAware接口，利用ApplicationContext获取bean
+    自动注入：
+    a、@ComponentScan
+    b、@Configuration+@Bean
+    c、@Import({ImportDemo.class})
+    
+ 9、springboot内嵌tomcat启动原理
+    通过注解@SpringBootApplication和SpringApplication.run方法配置属性、获取监听器，发布应用开始启动事件初、始化输入参数、配置环境，输出banner、创建上下文、预处理上下文、刷新上下文、再刷新上下文、发布应用已经启动事件、发布应用启动完成事件。在SpringBoot中启动tomcat的工作在刷新上下文这一步。而tomcat的启动主要是实例化两个组件：Connector、Container，一个tomcat实例就是一个Server，一个Server包含多个Service，也就是多个应用程序，每个Service包含多个Connector和一个Container，而一个Container下又包含多个子容器。
+    
+    
+    
 ~~~
+
+
 
 
 
@@ -204,5 +232,9 @@ public class VertApplication {
 5. 权限管理、发布审核、操作审计
 6. 客户端配置信息监控
 7. 部署简单
+
+appolo怎么实现动态配置？
+	apollo的实时配置实现原理跟spring加载配置文件一样的，
+
 ~~~
 
