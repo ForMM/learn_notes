@@ -162,6 +162,9 @@ ALTER TABLE t_account ADD INDEX idx_account_status (`account`,`status`);
  select DATE_FORMAT(create_time,'%Y%u') weeks,count(id) count from t_account group by weeks;  
  select DATE_FORMAT(create_time,'%Y%m') months,count(id) count from t_account group by months; 
 
+#查找重名的数据有哪些？按创建时间降序
+SELECT title, price, type, create_time FROM t_zq_course WHERE title IN ( SELECT title FROM t_zq_course GROUP BY title HAVING (COUNT(*) > 1)) ORDER BY create_time DESC;
+
 
 
 ~~~
