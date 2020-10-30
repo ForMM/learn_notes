@@ -440,5 +440,17 @@ https://blog.csdn.net/qukaiwei/article/details/50367761
 
 html + css + javascript + vue+ Spring Boot+Spring cloud + hibernate + Spring+rocket Mq+Redis+Es + linux + oracle
 
+编程猫：
+
+1. ribbon的负载均衡有几种,feign自带和重新配置的ribbon哪个生效
+2. zipkin的实现
+3. feiclient的服务发现原理
+4. 公平锁和非公平锁在jdk里的体现
+5. 重入锁的底层实现
+6. coutndownlatch的底层实现
+7. 自己怎么实现start的启动
+
+
+
 
 
