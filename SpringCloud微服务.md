@@ -2,24 +2,22 @@
 2. 有使用过zookeeper作为分布式锁嘛？ 答：没有，我使用的是redisson作为分布式锁
 3. 配置中心appllo的优点？怎么实现的动态配置更新？
 4. 熔断和降级的区别？
+5. nignx dubbo ribbon的负载均衡策略的区别？
 
 ~~~
 springcloud相关组件：
 	快速开发单体的微服务：Springboot
 	注册中心：Eureka
 	服务调用：Feign
-	日志链路跟踪：Sleuth
+	日志链路跟踪：Sleuth zipkin
 	负载均衡：Ribbon
 	服务熔断器：Hystrix
 	服务网关：Zuul gateway
 	配置中心：appllo
-	
-
-
 ~~~
 
 
-#### IDEA创建springcloud多模块项目
+### IDEA创建springcloud多模块项目
 
 ~~~
 1.构建主工程
@@ -59,7 +57,7 @@ springcloud相关组件：
 
 ~~~
 
-#### springboot重点知识
+### springboot重点知识
 
 ~~~java
 1、springboot的核心注解
@@ -137,11 +135,7 @@ springcloud相关组件：
     
 ~~~
 
-
-
-
-
-#### 常用注解
+### 常用注解
 
 ~~~java
 常用注解：
@@ -178,9 +172,7 @@ public class VertApplication {
 
 ### 服务调用Feign
 
-~~~
-
-~~~
+​		Feign远程调用，核心就是通过一系列的封装和处理，将以JAVA注解的方式定义的远程调用API接口，最终转换成HTTP的请求形式，然后将HTTP的请求的响应结果，解码成JAVA Bean，放回给调用者。
 
 ### Eureka
 
@@ -210,7 +202,7 @@ public class VertApplication {
 
 ~~~
 
-#### 熔断与降级
+### 熔断与降级
 
 ~~~
 熔断：分布式系统中，某个A服务由于自身原因或网络引起的不能服务，然后系统自动断开A服务的请求。防止雪崩。
@@ -238,3 +230,39 @@ appolo怎么实现动态配置？
 
 ~~~
 
+### Ribbon
+
+ribbon有7种负载均衡策略
+
+| 策略类                    | 命名               | 描述                                                         |
+| ------------------------- | ------------------ | ------------------------------------------------------------ |
+| RandomRule                | 随机策略           | 随机选择server                                               |
+| RoundRobinRule            | 轮询策略           | 按照顺序选择server（ribbon默认策略）                         |
+| RetryRule                 | 重试策略           | 在一个配置时间段内，当选择server不成功，则一直尝试选择一个可用的server |
+| BestAvailableRule         | 最低并发策略       | 逐个考察server，如果server断路器打开，则忽略，再选择其中并发链接最低的server |
+| AvailabilityFilteringRule | 可用过滤策略       | 过滤掉一直失败并被标记为circuit tripped的server，过滤掉那些高并发链接的server（active connections超过配置的阈值） |
+| ResponseTimeWeightedRule  | 响应时间加权重策略 | 根据server的响应时间分配权重，响应时间越长，权重越低，被选择到的概率也就越低。响应时间越短，权重越高，被选中的概率越高，这个策略很贴切，综合了各种因素，比如：网络，磁盘，io等，都直接影响响应时间 |
+| ZoneAvoidanceRule         | 区域权重策略       | 综合判断server所在区域的性能，和server的可用性，轮询选择server并且判断一个AWS Zone的运行性能是否可用，剔除不可用的Zone中的所有server |
+
+### springcloud之Feign、ribbon设置超时时间和重试机制的总结
+
+设置重试次数：
+
+```
+ribbon:
+  ReadTimeout: 3000
+  ConnectTimeout: 3000
+  MaxAutoRetries: 1 #同一台实例最大重试次数,不包括首次调用
+  MaxAutoRetriesNextServer: 1 #重试负载均衡其他的实例最大重试次数,不包括首次调用
+  OkToRetryOnAllOperations: false  #是否所有操作都重试 123456
+```
+
+根据上面的参数计算重试的次数：MaxAutoRetries+MaxAutoRetriesNextServer+(MaxAutoRetries *MaxAutoRetriesNextServer) 即重试3次 则一共产生4次调用 
+如果在重试期间，时间超过了hystrix的超时时间，便会立即执行熔断，fallback。所以要根据上面配置的参数计算hystrix的超时时间，使得在重试期间不能达到hystrix的超时时间，不然重试机制就会没有意义 
+hystrix超时时间的计算： (1 + MaxAutoRetries + MaxAutoRetriesNextServer) * ReadTimeout 即按照以上的配置 hystrix的超时时间应该配置为 （1+1+1）*3=9秒
+
+当ribbon超时后且hystrix没有超时，便会采取重试机制。当OkToRetryOnAllOperations设置为false时，只会对get请求进行重试。如果设置为true，便会对所有的请求进行重试，如果是put或post等写操作，如果服务器接口没做幂等性，会产生不好的结果，所以OkToRetryOnAllOperations慎用。
+
+如果不配置ribbon的重试次数，默认会重试一次
+
+**feign和ribbon同时设置connectTimeout readTimeout，feign的配置会覆盖掉ribbon的**
