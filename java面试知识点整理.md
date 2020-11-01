@@ -440,6 +440,13 @@ https://blog.csdn.net/qukaiwei/article/details/50367761
 
 html + css + javascript + vue+ Spring Boot+Spring cloud + hibernate + Spring+rocket Mq+Redis+Es + linux + oracle
 
+1. 分布式事务怎么处理
+2. kafka
+
+
+
+
+
 编程猫：
 
 1. ribbon的负载均衡有几种,feign自带和重新配置的ribbon哪个生效
