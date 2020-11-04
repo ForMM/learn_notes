@@ -121,7 +121,21 @@ semaphore.availablePermits()
 
 
 
+#### CyclicBarries(可循环使用屏障)
 
+让一组线程到达一个屏障（也可以叫屏障点）时被阻塞，直到最后一个线程到达屏障时，屏障才会开门，所有被拦屏障拦截的线程才会继续干活，线程进入屏障通过CylicBarrier的await()方法。
+
+~~~java
+//创建屏障点为6的锁
+CyclicBarrier cyclicBarrier = new CyclicBarrier(6 ,new Runnable(){
+  public void run() {
+    System.out.println("开始工作");
+  }
+});
+
+//进入屏障，进行等待最后一个线程到来，才去执行任务
+this.cyclicBarrier.await();
+~~~
 
 
 
