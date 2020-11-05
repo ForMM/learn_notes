@@ -137,6 +137,31 @@ CyclicBarrier cyclicBarrier = new CyclicBarrier(6 ,new Runnable(){
 this.cyclicBarrier.await();
 ~~~
 
+#### ReadWriteLock（读写锁）
+
+读锁和写锁，多个读锁不互斥，读锁和写锁互斥，写锁与写锁互斥。
+
+~~~java
+//创建读写锁
+ReentrantReadWriteLock reentrantReadWriteLock = new ReentrantReadWriteLock();
+
+//获取写锁 释放写锁
+reentrantReadWriteLock.writeLock().lock();
+reentrantReadWriteLock.writeLock().unlock();
+
+//获取读锁 释放读锁
+reentrantReadWriteLock.readLock().lock();
+reentrantReadWriteLock.readLock().unlock();
+~~~
+
+#### LockSupport
+
+基于Unsafe类中的park和unpark方法
+
+Park:
+
+
+
 
 
 1. 现在有一个方法task，希望只能被10个线程调用，利用Java相关类，应该如何来实现？
