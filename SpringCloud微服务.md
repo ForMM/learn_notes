@@ -248,7 +248,7 @@ ribbon有7种负载均衡策略
 
 设置重试次数：
 
-```
+```xml
 ribbon:
   ReadTimeout: 3000
   ConnectTimeout: 3000
@@ -266,3 +266,21 @@ hystrix超时时间的计算： (1 + MaxAutoRetries + MaxAutoRetriesNextServer) 
 如果不配置ribbon的重试次数，默认会重试一次
 
 **feign和ribbon同时设置connectTimeout readTimeout，feign的配置会覆盖掉ribbon的**
+
+### 分布式事务是怎么解决的
+
+- CAP理论
+
+- 两阶段提交（2PC）/ XA方案
+
+- 补偿事务（TCC）
+
+  Try、Confirm、Cancel
+
+- 本地消息表
+
+- 可靠消息最终一致性（阿里的RocketMQ）
+
+- 最大努力通知方案
+
+  
