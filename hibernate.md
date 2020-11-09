@@ -45,7 +45,7 @@
 
 获取数据库的会话
 
-1. getCurrentSr]ession会绑定当前线程，我们在配置hibernate时会让spring来管理事务，这个有事务的线程会绑定当前线程的session。而openSession会创建一个新的session。
+1. getCurrentSession会绑定当前线程，我们在配置hibernate时会让spring来管理事务，这个有事务的线程会绑定当前线程的session。而openSession会创建一个新的session。
 2. getCurrentSession事务是有spring来控制的，而openSession需要我们手动开启和手动提交事务
 3. getCurrentSession是不需要我们手动关闭的，因为工厂会自己管理，而openSession需要我们手动关闭。 
 

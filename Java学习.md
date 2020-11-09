@@ -61,20 +61,6 @@ InvocationHandler接口和Proxy类实现动态代理。
 java -Djava.ext.dirs=$JAVA_HOME/jre/lib/ext;d:\tmp\lib -jar d:\tmp\contract-base.jar
 ~~~
 
-### java工具类库
-
-#### fastjson 
-
-1.反序列化成泛型
-
-~~~java
-MsgData<TestBody> data = JSON.parseObject(json,new TypeReference<MsgData<TestBody>>(){});
-~~~
-
-TestBody类必须序列化
-
-
-
 #### Arrays类
 
 ~~~

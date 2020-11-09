@@ -158,9 +158,17 @@ reentrantReadWriteLock.readLock().unlock();
 
 基于Unsafe类中的park和unpark方法
 
-Park:
+1. 不能被实例化(构造函数是私有的)
 
+2. 方法都是静态方法
 
+```
+//阻塞当前线程
+LockSupport.park();
+
+//唤醒线程
+LockSupport.unpark(t1)
+```
 
 
 

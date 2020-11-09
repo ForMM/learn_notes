@@ -3,6 +3,8 @@
 3. 配置中心appllo的优点？怎么实现的动态配置更新？
 4. 熔断和降级的区别？
 5. nignx dubbo ribbon的负载均衡策略的区别？
+6. hystrix的隔离级别
+7. feign的算法有哪些
 
 ~~~
 springcloud相关组件：
