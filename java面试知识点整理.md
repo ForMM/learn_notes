@@ -7,10 +7,11 @@
 5. 线程池原理，几个重要的参数
 6. 锁的机制升降级
 7. Redis的实现原理、集群、数据存储、持久化
-8. java反射原理，注解原理
-9. HashMap在什么情况下会扩容，有哪些操作会导致扩容等知识点
-10. 单例设计的方案有哪些？你项目中哪些地方用到过？
-11. spring ioc和aop的实现原理
+8. redis作为分布式锁的缺点，内存淘汰策略，Redis怎么进行内存分析和清理
+9. java反射原理，注解原理
+10. HashMap在什么情况下会扩容，有哪些操作会导致扩容等知识点
+11. 单例设计的方案有哪些？你项目中哪些地方用到过？
+12. spring ioc和aop的实现原理
 
 中间件
 
@@ -225,6 +226,12 @@ redis的过期策略以及内存淘汰机制
 	总有过期的key没有被删除，这时候就要配置内存淘汰机制。（redis.conf中有配置）
 	内存淘汰策略：
 	redis.conf 配置文件里配置最大内存maxmemory；当现有内存大于maxmemory，触发内存淘汰策略。
+	volatile-lru：最近最少使用的数据淘汰
+	volatile-random：从已设置过期时间的数据集(server.db[i].expires)中任意选择数据淘汰
+	volatile-ttl：挑选将要过期的数据淘汰，ttl值越大越优先被淘汰
+	allkeys-lru：从数据集(server.db[i].dict)中挑选最近最少使用的数据淘汰
+	allkeys-random：从数据集(server.db[i].dict)中选择任意数据淘汰
+	noeviction：不移除任何key，内存满时直接返回一个写错误 ，默认选项，一般不会选用
 		
 	
 redis为什么执行这么快？

@@ -120,5 +120,14 @@ ps -ef|grep pid;查看线程具体情况
 nohup ./GoProxyServer &
 ~~~
 
+### vim相关操作指令
+
+~~~
+vim rabbitmq.config
+按键i进行插入编辑操作
+#搜索 the写法：/the     +回车
+
+~~~
+
 
 
