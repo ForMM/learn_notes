@@ -91,3 +91,5 @@ Hibernate为乐观锁提供了3中实现：
 
 - Hibernate配置文件中设置隔离级别
 
+#### Hibernate的底层实现原理
+
