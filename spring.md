@@ -26,15 +26,15 @@
 ### Spring IOC
 
 - spring ioc的实现原理
-  	控制反转：有一个依赖关系，从最上层往最下层找出依赖链，从最底层往上一步一步new对象。这个过程交给第三方容器来实现。
-  	ioc指spring ioc container，包括beans、core、context、spel。
-  	功能是bean的创建、注册、存储、销毁等
-  	重点接口和类：BeanFactory、ApplicationContext、WebApplicationContext、Beanfinition、BeandefinitionRegistry
-  	bean生命周期：实例化、设置属性值、初始化、销毁；BeanPostProcessor接口和InstantiationAwareBeanPostProcessor接口来实现。
+  	控制反转：有一个依赖关系，从最上层往最下层找出依赖链，从最底层往上一步一步new对象。这个过程交给第三方容器来实现。Ioc/Di是一种设计理念，利用容器管理Bean的注入，解决Bean之间的依赖关系。
+    	ioc指spring ioc container，包括beans、core、context、spel。
+    	功能是bean的创建、注册、存储、销毁等
+    	重点接口和类：BeanFactory、ApplicationContext、WebApplicationContext
+    	bean生命周期：实例化、设置属性值、初始化、销毁；
 - 容器启动过程：
    	1. web容器（tomcat）提供一个上下文环境，就是ServletContext
-   	2. web.xml文件中提供contextLoaderListener，容器启动时触发初始化事件，这个类监听到了此事件就会调用contextInitialized，在这个方法中会初始化一个启动上下文（WebApplicationContext）。然后读取xml文件中bean的配置保存到ServletContext中。
-   	3. 初始化servlet，也将其存到ServletContext中。
+      	2. web.xml文件中提供contextLoaderListener，容器启动时触发初始化事件，这个类监听到了此事件就会调用contextInitialized，在这个方法中会初始化一个启动上下文（WebApplicationContext）。然后读取xml文件中bean的配置保存到ServletContext中。
+         	3. 初始化servlet，也将其存到ServletContext中。
 
 ```xml
 	<listener>  
@@ -70,6 +70,18 @@ bean加载过程：
 		4、Spring容器从BeanDefinitionRegistry中取出加工后的BeanDefinition，并调用InstantiationStrategy着手进行Bean实例化的工作；
 		5、在实例化Bean时，Spring容器使用BeanWrapper对Bean进行封装，BeanWrapper提供了很多以Java反射机制操作Bean的方法，它将结合该Bean的BeanDefinition以及容器中属性编辑器，完成Bean属性的设置工作
 		6、利用容器中注册的Bean后处理器（实现BeanPostProcessor接口的Bean）对已经完成属性设置工作的Bean进行后续加工，直接装配出一个准备就绪的Bean。
+
+
+
+> Resource -> BeanDefinition -> BeanWrapper -> Object
+
+​	在Spring 进行 依赖注入的时候，首先把这种资源转化成Resource抽象，通过里面的IO流读取定义的bean。然后再转化成BeanDefinitioin，里面定义了包括构造器注入，以及setter注入的定义。最后通过BeanWrapper这个接口，首先获取定义的构造器注入属性，通过反射中的Constructor来创建对象。基于这个对象，通过java里面的内省机制获取到定义属性的属性描述器(PropertyDescriptor)，调用属性的写入方法完成依赖注入，最后再调用Spring的自定义初始化逻辑，主要包括以下三个扩展点：
+
+- BeanPostProcess，Spring aop就是基于此扩展。
+- Init-method，可以在 bean 标签通过 init-method定义，也可以实现InitializingBean
+- XXXAware，Spring容器感知类，可以在bean里面获取到 Spring容器的内部属性。
+
+
 
 参考地址：https://zhuanlan.zhihu.com/p/29344811
 				https://www.jianshu.com/p/1dec08d290c1
@@ -142,36 +154,11 @@ https://blog.csdn.net/qukaiwei/article/details/50367761
 
 - ##### 解决读问题：设置事务隔离级别
 
+  
+
+### Spring 用到的设计模式
 
 
-
-### 深入了解Spring 
-
-spring结构主要有：
-
-spring core container: spring-beans、spring-core、spring-context、spring-expression
-
-spring aop：
-
-spring jdbc:
-
-spring web:
-
-spring test:
-
-- #### spring Ioc/Di（控制反转/依赖注入）
-
-  Ioc/Di是一种设计理念，利用容器管理Bean的注入，解决Bean之间的依赖关系。
-
-  核心类BeanFactory工厂类来注入bean。指定bean采用注解或XML配置文件。
-
-- #### spring aop
-
-  通过代理模式为目标对象生成代理对象，并将横切逻辑插入到目标方法执行的前后。
-
-- #### spring mvc
-
-  mvc的核心类是dispatchservlet
 
 
 
