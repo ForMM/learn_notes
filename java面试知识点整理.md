@@ -524,3 +524,12 @@ Return
 什么是栈和堆
 
 网关可以做什么
+
+1. springcloud相关组件？答：配置中心使用appllo，注册中心Eureka，服务调用feign，日志链路跟踪使用的是Slueth等等
+2. 有使用过zookeeper作为分布式锁嘛？ 答：没有，我使用的是redisson作为分布式锁
+3. 配置中心appllo的优点？怎么实现的动态配置更新？
+4. 熔断和降级的区别？
+5. nignx dubbo ribbon的负载均衡策略的区别？
+6. hystrix的隔离级别
+7. feign的算法有哪些
+

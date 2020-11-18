@@ -1,10 +1,4 @@
-1. springcloud相关组件？答：配置中心使用appllo，注册中心Eureka，服务调用feign，日志链路跟踪使用的是Slueth等等
-2. 有使用过zookeeper作为分布式锁嘛？ 答：没有，我使用的是redisson作为分布式锁
-3. 配置中心appllo的优点？怎么实现的动态配置更新？
-4. 熔断和降级的区别？
-5. nignx dubbo ribbon的负载均衡策略的区别？
-6. hystrix的隔离级别
-7. feign的算法有哪些
+### Springcloud组件
 
 ~~~
 springcloud相关组件：
@@ -165,13 +159,6 @@ public class VertApplication {
 **/
 ~~~
 
-~~~
-
-  
-  
-  
-~~~
-
 ### 服务调用Feign
 
 ​		Feign远程调用，核心就是通过一系列的封装和处理，将以JAVA注解的方式定义的远程调用API接口，最终转换成HTTP的请求形式，然后将HTTP的请求的响应结果，解码成JAVA Bean，放回给调用者。
@@ -195,6 +182,33 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
 
 
 ### Eureka
+
+- 分布式系统的CAP理论
+
+  - 一致性（C）：所有节点上的数据时刻保持同步
+  - 可用性（A）：每个请求都能收到一个结果，不管是成功或者失败
+  - 分区容错性（P）：系统应该能持续提供服务，即使内部有消息丢失
+
+- Eureka server
+
+   	Eureka server提供服务注册服务，各个节点启动后，会在Eureka server中进行注册，Eureka server就会存	储所有可用的服务节点。Eureka server本身也是一个服务，搭建单机版的Eureka server注册中心，需要配置取消Eureka server的自动注册逻辑。
+      Eureka server通过Register、Get、Renew等接口提供服务的注册、发现、心跳检测等服务。
+
+  - 服务注册
+  - 接受eureka client发送过来的心跳检测
+  - 服务剔除（当一个client心跳超时）
+  - 服务下线（client请求关闭）
+  - 集群同步（不同eureka server中注册表信息同步）
+  - 获取注册表中服务实例信息（每个eureka server同时也是一个eureka client，eureka server可以把自己注册到eureka集群中）
+
+- Eureka client
+
+  - 服务实例通过ConcurrentHashMap保存在内存中，在服务注册的过程中会先获取一个锁，防止其他线程对registry注册表进行数据操作，避免数据不一致。
+    eureka server接收到client发送过来的InstanceInfo实例时，会先根据唯一的instanceId检查注册表中是否已存在该实例。
+  - 如果没有该实例，说明这是一次新的注册服务，server会将InstanceInfo信息保存到注册表中
+  - 如果存在该实例，说明这是一次心跳检测或者实例信息更新操作，会比较lastUpdatedTimestamp字段保留最新的InstanceInfo实例信息。
+
+- 集群
 
 ~~~
 分布式系统的CAP理论：
