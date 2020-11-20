@@ -131,11 +131,10 @@ springcloud相关组件：
     
 ~~~
 
-### 常用注解
+### Springcloud常用注解
 
 ~~~java
 常用注解：
-
 @SpringCloudApplication
 @EnableDiscoveryClient
 @EnableApolloConfig
@@ -224,23 +223,49 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
 
 - 形成的原因
 
-  大致可以分成三个阶段：
+  - 服务提供者不可用 	
 
-   服务提供者不可用 	
+    原因：
 
-  原因有： 		
+    1. 硬件故障：硬件故障可能为硬件损坏造成的服务器主机宕机, 网络硬件故障造成的服务提供者的不可访问.。
+    2. 程序bug：缓存击穿缓存击穿一般发生在缓存应用重启, 所有缓存被清空时,以及短时间内大量缓存失效时. 大量的缓存不命中, 使请求直击后端,造成服务提供者超负荷运行,引起服务不可用.。
+    3. 用户大量请求：在秒杀和大促开始前,如果准备不充分,用户发起大量请求也会造成服务提供者的不可用.。
 
-  硬件故障: 硬件故障可能为硬件损坏造成的服务器主机宕机, 网络硬件故障造成的服务提供者的不可访问. 	 		
+  - 重试加大流量
 
-  程序Bug:   		
+    原因：
 
-  缓存击穿缓存击穿一般发生在缓存应用重启, 所有缓存被清空时,以及短时间内大量缓存失效时. 大量的缓存不命中,  						 使请求直击后端,造成服务提供者超负荷运行,引起服务不可用. 	    
+    1. 用户重试：在服务提供者不可用后, 用户由于忍受不了界面上长时间的等待,而不断刷新页面甚至提交表单.。
+    2. 代码逻辑重试：服务调用端的会存在大量服务异常后的重试逻辑。
 
-  用户大量请求：在秒杀和大促开始前,如果准备不充分,用户发起大量请求也会造成服务提供者的不可用. 重试加大流量 	原因有: 		用户重试：在服务提供者不可用后, 用户由于忍受不了界面上长时间的等待,而不断刷新页面甚至提交表单. 		代码逻辑重试：服务调用端的会存在大量服务异常后的重试逻辑.  服务调用者不可用 	原因有： 		同步等待造成的资源耗尽: 当服务调用者使用 同步调用 时, 会产生大量的等待线程占用系统资源. 一旦线程资源被耗 		尽,服务调用者提供的服务也将处于不可用状态, 于是服务雪崩效应产生了.
+  - 服务调用者不可用
+
+    原因：
+
+    同步等待造成的资源耗尽，当服务调用者使用同步调用时，会产生大量的等待线程占用系统资源。一旦线程资源被耗尽,服务调用者提供的服务也将处于不可用状态, 于是服务雪崩效应产生了。
 
 - 应对策略
 
-  1.流量控制 网关限流:因为Nginx的高性能, 目前一线互联网公司大量采用Nginx+Lua的网关进行流量控制, 由此而来的OpenResty也越 		 来越热门. 用户交互限流：1. 采用加载动画,提高用户的忍耐等待时间. 2. 提交按钮添加强制等待时间机制. 关闭重试 2.改进缓存模式： 缓存预加载 同步改为异步刷新 3.服务器自动扩容 AWS的auto scaling 4.服务调用者降级服务 资源隔离:资源隔离主要是对调用服务的线程池进行隔离. 对依赖服务进行分类：我们根据具体业务,将依赖服务分为: 强依赖和若依赖. 强依赖服务不可用会导致当前业务中止,而弱	 					依赖服务的不可用不会导致当前业务的中止. 不可用服务的调用快速失败:不可用服务的调用快速失败一般通过 超时机制, 熔断器 和熔断后的 降级方法 来实现.
+  - 流量控制 
+
+    1. 网关限流:因为Nginx的高性能, 目前一线互联网公司大量采用Nginx+Lua的网关进行流量控制, 由此而来的OpenResty也越来越热门。
+    2. 用户交互限流：a. 采用加载动画,提高用户的忍耐等待时间. b 提交按钮添加强制等待时间机制. 
+    3. 关闭重试
+
+  - 改进缓存模式
+
+    1. 缓存预加载 
+    2. 同步改为异步刷新 
+
+  - 服务器自动扩容
+
+     AWS的auto scaling 
+
+  - 服务调用者降级服务
+
+    1.  资源隔离:资源隔离主要是对调用服务的线程池进行隔离. 
+    2. 对依赖服务进行分类：我们根据具体业务,将依赖服务分为: 强依赖和若依赖. 强依赖服务不可用会导致当前业务中止,而弱依赖服务的不可用不会导致当前业务的中止. 
+    3. 不可用服务的调用快速失败: 不可用服务的调用快速失败一般通过超时机制, 熔断器和熔断后的降级方法来实现.
 
 ### 熔断与降级
 
@@ -253,7 +278,81 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
 
 ~~~
 
-### apollo配置
+### 熔断器（Hystrix）
+
+Hystrix设计原则：
+
+- 线程池隔离
+
+  通过线程池能够将不同的业务由不同的线程池处理，从而做到保护其它业务能够正常访问。线程池的构造最终会落到HystrixThreadPool.Factory这个类上面。这个类内存持有一个ConcurrentHashMap用于缓存线程池对象，当传入的HystrixThreadPoolKey已经构造过了相应的ThreadPool，将会直接从ConcurrentHashMap里返回已经生成的ThreadPool。
+
+- 信号量隔离
+
+- 熔断
+
+  Hystrix中的熔断器(Circuit Breaker)在运行过程中会向每个CommandKey对应的熔断器报告成功、失败、超时和拒绝的状态，熔断器维护计算统计的数据，根据这些统计的信息来确定熔断器是否打开。如果打开，后续的请求都会被截断（不再执行run方法里的内容了，直接执行fallback方法里的内容）。然后会隔一段时间默认是5s，尝试半开，放入一部分流量请求进来，相当于对依赖服务进行一次健康检查，如果恢复，熔断器关闭，随后完全恢复调用。断路由有三种状态 ，分别为关闭，打开，半开状态。
+
+- 降级回退
+
+  所谓降级，就是指在在Hystrix执行非核心链路功能失败的情况下，我们如何处理，比如我们返回默认值等。如果我们要回退或者降级处理，代码上需要实现HystrixCommand.getFallback()方法或者是HystrixObservableCommand. resumeWithFallback()。
+
+  ~~~properties
+  server.port=9000
+  spring.application.name=consumer-feign-hystrix
+  eureka.instance.hostname=localhost
+  eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka/
+  spring.cloud.circuit.breaker.enabled=true
+  
+  ribbon.ReadTimeout=5000
+  
+  feign.hystrix.enabled=true
+  #command相关
+  hystrix.command.default.execution.isolation.strategy=THREAD
+  #设置调用者的超时时间
+  hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds=6000
+  #是否开启超时设置
+  hystrix.command.default.execution.timeout.enabled=true
+  #表示是否在执行超时时，中断HystrixCommand.run() 的执行
+  hystrix.command.default.execution.isolation.thread.interruptOnTimeout=true
+  
+  #fallback相关
+  #是否开启fallback功能
+  hystrix.command.default.fallback.enabled=true
+  
+  #断路器相关
+  #是否开启断路器
+  hystrix.command.default.circuitBreaker.enabled=true
+  #窗口时间内打开断路器最小的请求量
+  hystrix.command.default.circuitBreaker.requestVolumeThreshold=5
+  #断路器跳闸后，在此值的时间的内，hystrix会拒绝新的请求，只有过了这个时间断路器才会打开闸门
+  hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds=5
+  #失败百分比的阈值
+  hystrix.command.default.circuitBreaker.errorThresholdPercentage=20
+  
+  #线程相关配置
+  #核心线程数
+  hystrix.threadpool.default.coreSize=5
+  #最大线程数
+  hystrix.threadpool.default.maximumSize=5
+  #队列的大小
+  hystrix.threadpool.default.maxQueueSize=1024
+  #因为maxQueueSize值不能被动态修改，所有通过设置此值可以实现动态修改等待队列长度。即等待的队列的数量大于queueSizeRejectionThreshold时（但是没有达到maxQueueSize值），则开始拒绝后续的请求进入队列
+  hystrix.threadpool.default.queueSizeRejectionThreshold=128
+  #设置线程多久没有服务后，需要释放（maximumSize-coreSize ）个线程
+  hystrix.threadpool.default.keepAliveTimeMinutes=60
+  ~~~
+
+  重点关注:
+
+  ​	上面属性的default可以改成ComandKey，这样就可以对特定的接口进行配置了，Feign中CommandKey的值为：接口名#方法名(参数类型)，如上的CommandKey为UserService#getUser(Integer)
+
+  ​	在测试hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds 属性的时候，服务端如果在指定的时间返回了结果，但系统还是调用了fallback里的逻辑，需要指定ribbon.ReadTimeout的时间。
+
+### 链路追踪
+
+
+
+### Apollo配置
 
 ~~~
 优点：
