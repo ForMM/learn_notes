@@ -208,3 +208,6 @@ PS Old Generation //老生代区域分配情况
 -XX:TargetSuriviorRatio：设置surivior空间使用率，当surivior空间使用率达到这个数值时，会将对应的对象送入老年代。
 ~~~
 
+#### 服务不可用，怎么排查？
+
+线上机器的cpu使用率逐步增高，最终达到100%导致线上服务不可用。
