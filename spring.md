@@ -359,6 +359,8 @@ https://blog.csdn.net/qukaiwei/article/details/50367761
 
 ### Spring MVC
 
+SpringMVC框架是以请求为驱动，围绕Servlet设计，将请求发给控制器，然后通过模型对象，分派器来展示请求结果视图。其中核心类是DispatcherServlet，它是一个Servlet，顶层是实现的Servlet接口。
+
 
 
 ### Spring 用到的设计模式
