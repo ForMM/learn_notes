@@ -127,6 +127,22 @@ bean加载过程：
 6. 源码分析
 
    spring用代理类包裹切面，把他们织入到Spring管理的bean中。也就是说代理类伪装成目标类，它会截取对目标类中方法的调用，让调用者对目标类的调用都先变成调用伪装类，伪装类中就先执行了切面，再把调用转发给真正的目标bean。
+   
+7. 多个aop的执行顺序
+
+   Method是具体的切入点，order代表优先级，它根据一个int值来判断优先级的高低，**数字越小，优先级越高**
+
+   ![spring-1](./img/spring-1.jpg)
+
+   
+
+   1. 在一个Aspect类中不要有多个同种类型的通知，如多个@Before、多个@After；
+
+   2. 不要在通知方法上使用@Order来区分优先级，要遵循默认的通知方法优先级；
+
+   3. 如果避免不了有相同类型的通知，要区分在不同的Aspect类中，并且通过@Order(1)、@Order(2)、@Order(3)... 来区分Aspect类的优先级，即以切面类作为优先级的区分单元，而不是通知方法；
+
+   4. 在编写多个通知方法时，应当把实际业务需要与默认通知优先级结合编码。
 
 https://blog.csdn.net/qukaiwei/article/details/50367761
 
@@ -136,13 +152,13 @@ https://blog.csdn.net/qukaiwei/article/details/50367761
 
 - ##### 事务特性（4种）：
 
-  原子性：强调事务的不可分割
+  原子性(atomicity)：强调事务的不可分割
 
-  一致性：事务的执行前后数据完整性保存一致
+  一致性(consistency)：事务的执行前后数据完整性保存一致
 
-  隔离性：一个事务执行过程中，不受其他事务干扰
+  隔离性(isolation)：一个事务执行过程中，不受其他事务干扰
 
-  持久性：事务一旦结束，数据就持久到数据库
+  持久性(durability)：事务一旦结束，数据就持久到数据库
 
 - ##### 如果不考虑隔离性引发安全性问题：
 
@@ -150,9 +166,195 @@ https://blog.csdn.net/qukaiwei/article/details/50367761
 
   不可重复读：一个事务读到了另一个事务已经提交的update数据导致多次查询结果不一致
 
-  虚读：一个事务读到了另一个事务已经提交的insert的数据导致多次查询结果不一致
+  虚读（幻读）：一个事务读到了另一个事务已经提交的insert的数据导致多次查询结果不一致
 
 - ##### 解决读问题：设置事务隔离级别
+
+  | 隔离级别                   | 含义                                                         |
+  | -------------------------- | ------------------------------------------------------------ |
+  | ISOLATION_DEFAULT          | 使用后端数据库默认的隔离级别                                 |
+  | ISOLATION_READ_UNCOMMITTED | 最低的隔离级别，允许读取尚未提交的数据变更，可能会导致脏读、幻读或不可重复读 |
+  | ISOLATION_READ_COMMITTED   | 允许读取并发事务已经提交的数据，可以阻止脏读，但是幻读或不可重复读仍有可能发生 |
+  | ISOLATION_REPEATABLE_READ  | 对同一字段的多次读取结果都是一致的，除非数据是被本身事务自己所修改，可以阻止脏读和不可重复读，但幻读仍有可能发生 |
+  | ISOLATION_SERIALIZABLE     | 最高的隔离级别，完全服从ACID的隔离级别，确保阻止脏读、不可重复读以及幻读，也是最慢的事务隔离级别，因为它通常是通过完全锁定事务相关的数据库表来实现的 |
+
+- 
+
+- **spring事务管理器**
+
+  spring并不会直接管理事务，而且是提供了多种事务管理器，他将事务管理的职责交给第三方平台hibernate等来实现。事务管理接口：org.springframework.transaction.PlatformTransactionManager。
+
+  ~~~java
+  Public interface PlatformTransactionManager()...{  
+      // 由TransactionDefinition得到TransactionStatus对象
+      TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException; 
+      // 提交
+      Void commit(TransactionStatus status) throws TransactionException;  
+      // 回滚
+      Void rollback(TransactionStatus status) throws TransactionException;  
+      } 
+  ~~~
+
+  Spring事务管理的一个优点就是为不同的事务API提供一致的编程模型。TransactionDefinition定义事务属性,TransactionStatus定义事务状态
+
+  ~~~java
+  public interface TransactionDefinition {
+      int getPropagationBehavior(); // 返回事务的传播行为
+      int getIsolationLevel(); // 返回事务的隔离级别，事务管理器根据它来控制另外一个事务可以看到本事务内的哪些数据
+      int getTimeout();  // 返回事务必须在多少秒内完成
+      boolean isReadOnly(); // 事务是否只读，事务管理器能够根据这个返回值进行优化，确保事务是只读的
+  } 
+  ~~~
+
+  ~~~java
+  public interface TransactionStatus{
+      boolean isNewTransaction(); // 是否是新的事物
+      boolean hasSavepoint(); // 是否有恢复点
+      void setRollbackOnly();  // 设置为只回滚
+      boolean isRollbackOnly(); // 是否为只回滚
+      boolean isCompleted; // 是否已完成
+  } 
+  ~~~
+
+- **事务属性**
+
+  - 传播行为
+
+    7种传播行为：
+
+    | 传播行为                  | 含义                                                         |
+    | ------------------------- | ------------------------------------------------------------ |
+    | PROPAGATION_REQUIRED      | 表示当前方法必须运行在事务中。如果当前事务存在，方法将会在该事务中运行。否则，会启动一个新的事务 |
+    | PROPAGATION_SUPPORTS      | 表示当前方法不需要事务上下文，但是如果存在当前事务的话，那么该方法会在这个事务中运行 |
+    | PROPAGATION_MANDATORY     | 表示该方法必须在事务中运行，如果当前事务不存在，则会抛出一个异常 |
+    | PROPAGATION_REQUIRED_NEW  | 表示当前方法必须运行在它自己的事务中。一个新的事务将被启动。如果存在当前事务，在该方法执行期间，当前事务会被挂起。如果使用JTATransactionManager的话，则需要访问TransactionManager |
+    | PROPAGATION_NOT_SUPPORTED | 表示该方法不应该运行在事务中。如果存在当前事务，在该方法运行期间，当前事务将被挂起。如果使用JTATransactionManager的话，则需要访问TransactionManager |
+    | PROPAGATION_NEVER         | 表示当前方法不应该运行在事务上下文中。如果当前正有一个事务在运行，则会抛出异常 |
+    | PROPAGATION_NESTED        | 表示如果当前已经存在一个事务，那么该方法将会在嵌套事务中运行。嵌套的事务可以独立于当前事务进行单独地提交或回滚。如果当前事务不存在，那么其行为与PROPAGATION_REQUIRED一样。注意各厂商对这种传播行为的支持是有所差异的。可以参考资源管理器的文档来确认它们是否支持嵌套事务 |
+
+  - 隔离规则
+
+    上面表格有介绍
+
+  - 回滚规则
+
+    默认情况下，事务只有遇到运行期异常时才会回滚，而在遇到检查型异常时不会回滚（这一行为与EJB的回滚行为是一致的）
+    但是你可以声明事务在遇到特定的检查型异常时像遇到运行期异常那样回滚。同样，你还可以声明事务遇到特定的异常不回滚，即使这些异常是运行期异常。
+
+  - 事务超时
+
+    为了使应用程序很好地运行，事务不能运行太长的时间。因为事务可能涉及对后端数据库的锁定，所以长时间的事务会不必要的占用数据库资源。事务超时就是事务的一个定时器，在特定时间内事务如果没有执行完毕，那么就会自动回滚，而不是一直等待其结束。
+
+  - 是否只读
+
+    事务的第三个特性是它是否为只读事务。如果事务只对后端的数据库进行该操作，数据库可以利用事务的只读特性来进行一些特定的优化。通过将事务设置为只读，你就可以给数据库一个机会，让它应用它认为合适的优化措施。
+
+- 编程式事务
+
+  Spring提供两种方式的编程式事务管理，分别是：使用TransactionTemplate和直接使用PlatformTransactionManager。
+
+- 声明式事务
+
+  1. 基于配置
+
+     （1）配置事务管理器
+
+     ~~~xml
+     <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">       
+               <property name="dataSource" ref="dataSource"></property>  
+     </bean>
+     ~~~
+
+     （2）配置中加入事务规则
+
+     ~~~xml
+     <tx:advice id="iccardTxAdvice" transaction-manager="transactionManager">
+         <tx:attributes>
+             <tx:method name="delete*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception" no-rollback-for="java.lang.RuntimeException"/>
+             <tx:method name="insert*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.RuntimeException" />
+             <tx:method name="add*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.RuntimeException" />
+             <tx:method name="create*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.RuntimeException" />
+             <tx:method name="update*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception" />
+     
+             <tx:method name="find*" propagation="SUPPORTS" />
+             <tx:method name="get*" propagation="SUPPORTS" />
+             <tx:method name="select*" propagation="SUPPORTS" />
+             <tx:method name="query*" propagation="SUPPORTS" />
+         </tx:attributes>
+     </tx:advice>
+     
+     <!-- 把事务控制在service层 -->
+     <aop:config>
+         <aop:pointcut id="txPointcut" expression="execution(public * com.zkzong.service.*.*(..))" />
+         <aop:advisor pointcut-ref="txPointcut" advice-ref="iccardTxAdvice" />
+     </aop:config>
+     ~~~
+
+  2. 基于`@Transactional`注解
+
+     (1) 配置事务管理器
+
+     ~~~xml
+     <!-- 定义事务管理器 -->    
+     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">    
+         <property name="dataSource" ref="dataSource" />    
+     </bean>    
+     <!--使用注释事务 -->    
+     <tx:annotation-driven  transaction-manager="transactionManager" />
+     ~~~
+
+     (2)在需要加上事务的方法或者类上加上注解@Transactional
+
+     @Transactional 可以作用在`接口`、`类`、`类方法`，
+
+     - **作用于类**：当把@Transactional 注解放在类上时，表示所有该类的`public`方法都配置相同的事务属性信息。
+     - **作用于方法**：当类配置了@Transactional，方法也配置了@Transactional，方法的事务会覆盖类的事务配置信息。
+     - **作用于接口**：不推荐这种使用方法，因为一旦标注在Interface上并且配置了Spring AOP 使用CGLib动态代理，将会导致@Transactional注解失效
+
+     **@Transactional注有哪些属性？**
+
+     **propagation属性**
+
+     - `Propagation.REQUIRED`：如果当前存在事务，则加入该事务，如果当前不存在事务，则创建一个新的事务。**(** 也就是说如果A方法和B方法都添加了注解，在默认传播模式下，A方法内部调用B方法，会把两个方法的事务合并为一个事务 **）**
+     - `Propagation.SUPPORTS`：如果当前存在事务，则加入该事务；如果当前不存在事务，则以非事务的方式继续运行。
+     - `Propagation.MANDATORY`：如果当前存在事务，则加入该事务；如果当前不存在事务，则抛出异常。
+     - `Propagation.REQUIRES_NEW`：重新创建一个新的事务，如果当前存在事务，暂停当前的事务。**(** 当类A中的 a 方法用默认`Propagation.REQUIRED`模式，类B中的 b方法加上采用 `Propagation.REQUIRES_NEW`模式，然后在 a 方法中调用 b方法操作数据库，然而 a方法抛出异常后，b方法并没有进行回滚，因为`Propagation.REQUIRES_NEW`会暂停 a方法的事务 **)**
+     - `Propagation.NOT_SUPPORTED`：以非事务的方式运行，如果当前存在事务，暂停当前的事务。
+     - `Propagation.NEVER`：以非事务的方式运行，如果当前存在事务，则抛出异常。
+     - `Propagation.NESTED` ：和 Propagation.REQUIRED 效果一样。
+
+     **isolation 属性**
+
+     - Isolation.DEFAULT：使用底层数据库默认的隔离级别。
+     - Isolation.READ_UNCOMMITTED
+     - Isolation.READ_COMMITTED
+     - Isolation.REPEATABLE_READ
+     - Isolation.SERIALIZABLE
+
+     **timeout 属性**
+     `timeout` ：事务的超时时间，默认值为 -1。如果超过该时间限制但事务还没有完成，则自动回滚事务。
+     **readOnly 属性**
+     `readOnly` ：指定事务是否为只读事务，默认值为 false；为了忽略那些不需要事务的方法，比如读取数据，可以设置 read-only 为 true。
+     **rollbackFor 属性**
+     `rollbackFor` ：用于指定能够触发事务回滚的异常类型，可以指定多个异常类型。
+     **noRollbackFor**属性
+     `noRollbackFor`：抛出指定的异常类型，不回滚事务，也可以指定多个异常类型。
+
+  `@Transactional`失效场景
+
+  1. @Transactional 应用在非 public 修饰的方法上。**注意：`protected`、`private` 修饰的方法上使用 `@Transactional` 注解，虽然事务无效，但不会有任何报错，这是我们很容犯错的一点。**
+
+  2. @Transactional 注解属性 propagation 设置错误
+
+     `TransactionDefinition.PROPAGATION_SUPPORTS`：如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行。 `TransactionDefinition.PROPAGATION_NOT_SUPPORTED`：以非事务方式运行，如果当前存在事务，则把当前事务挂起。 `TransactionDefinition.PROPAGATION_NEVER`：以非事务方式运行，如果当前存在事务，则抛出异常。
+
+  3. @Transactional 注解属性 rollbackFor 设置错误
+
+  4. 异常被你的 catch“吃了”导致@Transactional失效
+
+  5. 数据库引擎不支持事务
+
+     常用的MySQL数据库默认使用支持事务的`innodb`引擎。一旦数据库引擎切换成不支持事务的`myisam`，那事务就从根本上失效了。
 
 
 ### Spring MVC

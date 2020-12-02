@@ -533,3 +533,12 @@ Return
 6. hystrix的隔离级别
 7. feign的算法有哪些
 
+
+
+福米：
+
+1. java内存规范
+2. volidate作用
+3. mysql的优化（配置引擎、索引、锁）
+4. 锁的模型
+

@@ -1,5 +1,14 @@
 # Mysql
 
+### 隔离级别
+
+1. 读未提交（READ UNCOMMITTED）
+2. 读已提交（READ COMMITTED）
+3. 可重复读（REPEATABLE READ）
+4. 串行化（SERIALIZABLE）
+
+从上往下，隔离强度逐渐增强，性能逐渐变差。采用哪种隔离级别要根据系统需求权衡决定，其中，**可重复读**是 MySQL 的默认级别。
+
 ### linux安装mysql1.8
 
 ~~~shell
