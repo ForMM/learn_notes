@@ -79,7 +79,7 @@ springcloud相关组件：
 2、springboot的自动配置原理
 	springboot项目中启动类必须设置@SpringBootApplication注解，这个包含@SpringBootConfiguration
 @EnableAutoConfiguration @ComponentScan的注解
-	@SpringBootConfiguration使用了@Configuration注解，@EnableAutoConfiguration注解使用了@Import注解，@Import导入EnableAutoConfigurationImportSelector.class类。这个类就来处理需要自动配置的类，配置类的信息在META-INF/spring.factories文件中。
+	@SpringBootConfiguration使用了@Configuration注解，@EnableAutoConfiguration注解使用了@Import注解，@Import导入AutoConfigurationImportSelector.class类。这个类就来处理需要自动配置的类，配置类的信息在META-INF/spring.factories文件中。
 	@Configuration：标明为配置类
 	@EnableConfigurationProperties(HttpEncodingProperties.class)声明开启属性注入
 	@ConditionalOnClass(CharacterEncodingFilter.class)当CharacterEncodingFilter在类路径的条	件下
