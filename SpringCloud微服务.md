@@ -82,24 +82,32 @@ springcloud相关组件：
 
   springboot有一个配置文件application.properties，配置文件中有server.port这些配置。他们是如何生效的？
 
-  springboot项目中启动类必须设置@SpringBootApplication注解，这个包含@SpringBootConfiguration
-  @EnableAutoConfiguration @ComponentScan的注解。自动配置的实现靠@EnableAutoConfiguration注解来实现。
+  1. springboot项目中启动类必须设置@SpringBootApplication注解，这个包含@SpringBootConfiguration
+     @EnableAutoConfiguration @ComponentScan的注解。自动配置的实现靠@EnableAutoConfiguration注解来实现。
 
-  @EnableAutoConfiguration注解使用了@Import注解，@Import导入EnableAutoConfigurationImportSelector.class类。这个类就来处理需要自动配置的类，配置类的信息在META-INF/spring.factories文件中。
+  2. @EnableAutoConfiguration注解使用了@Import注解，@Import导入AutoConfigurationImportSelector.class类。这个类就来处理需要自动配置的类，他里面SpringFactoriesLoader.loadFactoryNames会扫描到spring-boot-autoconfigure-x.x.x.jar包里的META-INF/spring.factories文件中的配置类信息。
+
+  3. spring-boot-autoconfigure-x.x.x.jar包里很多配置类（aop、amqp、elasticserch等），每一个XxxxAutoConfiguration自动配置类都是在某些条件之下才会生效的，不会全部进行加载。这些条件的限制在Spring Boot中以注解的形式体现，常见的**条件注解**有如下几项：
+
+     ~~~java
+     @ConditionalOnBean：当容器里有指定的bean的条件下。
+     
+     @ConditionalOnMissingBean：当容器里不存在指定bean的条件下。
+     
+     @ConditionalOnClass：当类路径下有指定类的条件下。
+     
+     @ConditionalOnMissingClass：当类路径下不存在指定类的条件下。
+     
+     @ConditionalOnProperty：指定的属性是否有指定的值，比如@ConditionalOnProperties(prefix=”xxx.xxx”, value=”enable”, matchIfMissing=true)，代表当xxx.xxx为enable时条件的布尔值为true，如果没有设置的情况下也为true。
+     ~~~
+
+     **@ConfigurationProperties**，它的作用就是从配置文件中绑定属性到对应的bean上，而**@EnableConfigurationProperties**负责导入这个已经绑定了属性的bean到spring容器中。
+
+     一定要记得XxxxProperties类的含义是：封装配置文件中相关属性；XxxxAutoConfiguration类的含义是：自动配置类，目的是给容器中添加组件
 
 - springboot启动原理
 
 ~~~java
-
-2、springboot的自动配置原理
-	springboot项目中启动类必须设置@SpringBootApplication注解，这个包含@SpringBootConfiguration
-@EnableAutoConfiguration @ComponentScan的注解
-	@SpringBootConfiguration使用了@Configuration注解，@EnableAutoConfiguration注解使用了@Import注解，@Import导入AutoConfigurationImportSelector.class类。这个类就来处理需要自动配置的类，配置类的信息在META-INF/spring.factories文件中。
-	@Configuration：标明为配置类
-	@EnableConfigurationProperties(HttpEncodingProperties.class)声明开启属性注入
-	@ConditionalOnClass(CharacterEncodingFilter.class)当CharacterEncodingFilter在类路径的条	件下
-	@ConditionalOnProperty(prefix = “spring.http.encoding”, value = “enabled”, 				matchIfMissing = true)当spring.http.encoding=enabled的情况下，如果没有设置则默认为true，即条件符合
-	@ConditionalOnMissingBean当容器中没有这个Bean时新建Bean
 
 3、springboot如何使用xml配置
 	@Configuration和@ImportResource 配置即可,location传入的是一个字符串数组,所以可以传入多个xml配	置.
