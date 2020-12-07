@@ -138,3 +138,27 @@ java -Djava.ext.dirs=$JAVA_HOME/jre/lib/ext;d:\tmp\lib -jar d:\tmp\contract-base
 
 2. 要深拷贝，得注意对象的内部对象，也需要clone
 
+### java NIO
+
+1. 同步与异步
+
+   任务A和任务B都要执行，顺序执行AB任务就是同步，AB可以独立执行就是异步；
+
+2. 阻塞与非阻塞
+
+   任务A调用任务B，必须等到返回结果才能继续执行，任务A等待过程就是阻塞状态；任务A调用任务B，不用等待任务B的执行结果就可以执行接下来的任务，这种事非阻塞。
+
+   同步阻塞IO，数据的读写必须阻塞在一个线程内等待其完成。
+
+   同步非阻塞IO，单线程写数据到buffer，同时可以去做其他的事情，当数据读取到buffer后，线程再继续处理数据。
+   	
+
+
+	buffer（IO面向流，NIO面向缓冲区）
+	channel（通过通道进行读写）
+	selector（单线程处理多个通道）
+
+使用场景：
+
+netty
+dubbo等rpc框架

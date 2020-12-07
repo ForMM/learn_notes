@@ -47,10 +47,7 @@ springcloud相关组件：
         <artifactId>main-project</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    
-
-
-
+   
 ~~~
 
 ### springboot重点知识
@@ -107,52 +104,73 @@ springcloud相关组件：
 
 - springboot启动原理
 
-~~~java
+  启动类：
 
-3、springboot如何使用xml配置
-	@Configuration和@ImportResource 配置即可,location传入的是一个字符串数组,所以可以传入多个xml配	置.
-	如：@ImportResource(locations = {"classpath:beans.xml"})
-	
-4、springboot核心配置文件
-	application 和 bootstrap 文件；
-	bootstrap 配置文件是系统级别的，用来加载外部配置，如配置中心的配置信息，也可以用来定义系统不会变化的属	性.bootstatp 文件的加载先于application文件；
-	application 配置文件是应用级别的，是当前应用的配置文件；
-	
-5、springboot的启动原理
-		@SpringBootApplication
-    public class CommonConfigApplication {
-      public static void main(String[] args) {
-        SpringApplication.run(CommonConfigApplication.class, args);
-      }
+  ~~~java
+  @SpringBootApplication
+  public class CommonConfigApplication {
+    public static void main(String[] args) {
+      SpringApplication.run(CommonConfigApplication.class, args);
     }
+  }
+  ~~~
 
-  a、SpringApplication.run方法
-  b、创建监听器springApplicationRunListeners
-  c、加载ConfiguableEnviroment配置环境
-  d、把Enviroment放到监听器中
-  e、创建run方法返回的ConfigureApplicationContext应用上下文
-  f、prepareContext()将监听器、配置环境等关联
-  g、refreshContext()自动化配置（跟自动化配置原理一样）
-    
- 6、如何禁用指定的自动配置类
-    @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
-    
- 7、Spring boot actuator监听器
-    运行状态监控的功能；使用时倒入spring-boot-starter-actuator的依赖即可
-		
- 8、springboot手动和自动注入bean
-    手动注入：实现ApplicationContextAware接口，利用ApplicationContext获取bean
-    自动注入：
-    a、@ComponentScan
-    b、@Configuration+@Bean
-    c、@Import({ImportDemo.class})
-    
- 9、springboot内嵌tomcat启动原理
-    通过注解@SpringBootApplication和SpringApplication.run方法配置属性、获取监听器，发布应用开始启动事件初、始化输入参数、配置环境，输出banner、创建上下文、预处理上下文、刷新上下文、再刷新上下文、发布应用已经启动事件、发布应用启动完成事件。在SpringBoot中启动tomcat的工作在刷新上下文这一步。而tomcat的启动主要是实例化两个组件：Connector、Container，一个tomcat实例就是一个Server，一个Server包含多个Service，也就是多个应用程序，每个Service包含多个Connector和一个Container，而一个Container下又包含多个子容器。
-    
-    
-    
-~~~
+  - SpringApplication.run方法首先会new SpringApplication()进行初始化的操作
+
+    1. 根据classpath下是否存在（ConfigurableWebApplicationContext）判断是否要启动一个WebApplicationContext
+    2. 设置属性List<ApplicationContextInitializer<?>> initializers和List<ApplicationListener<?>> listeners中途读取了类路径下所有META-INF/spring.factories的属性，并缓存到了SpringFactoriesLoader的cache缓存中，而这个cache会在本文中用到
+    3. 推断主类，并赋值到属性mainApplicationClass
+
+  - 创建监听器SpringApplicationRunListeners,然后starting()，监听SpringApplication的启动
+
+  - 加载springboot的配置环境（ConfigurableEnvironment），如果是web容器，加载StandardEnvironment。并把配置环境（environment）放入监听器中。
+
+  - Banner属性设置
+
+  - 用配置上下文（ConfigurableApplicationContext）创建
+
+  - perpareContext方法将监听器、配置环境、banner等与配置上下文相关联
+
+  - refreshContext(context)方法将bean实例化并注入ioc容器
+
+    refresh()方法做了很多核心工作比如BeanFactory的设置，BeanFactoryPostProcessor接口的执行、BeanPostProcessor接口的执行、自动化配置类的解析、spring.factories的加载、bean的实例化、条件注解的解析、国际化的初始化等等
+
+  - 最后springboot的收尾工作
+
+- springboot内嵌tomcat启动原理
+
+  通过注解@SpringBootApplication和SpringApplication.run方法配置属性、获取监听器，发布应用开始启动事件初、始化输入参数、配置环境，输出banner、创建上下文、预处理上下文、刷新上下文、再刷新上下文、发布应用已经启动事件、发布应用启动完成事件。在SpringBoot中启动tomcat的工作在刷新上下文这一步。而tomcat的启动主要是实例化两个组件：Connector、Container，一个tomcat实例就是一个Server，一个Server包含多个Service，也就是多个应用程序，每个Service包含多个Connector和一个Container，而一个Container下又包含多个子容器。
+
+- springboot手动和自动注入bean
+
+  ​	手动注入：实现ApplicationContextAware接口，利用ApplicationContext获取bean
+  ​    自动注入：
+  ​    a、@ComponentScan
+  ​    b、@Configuration+@Bean
+  ​    c、@Import({ImportDemo.class})
+
+- 如何禁用指定的自动配置类
+
+  ~~~java
+   @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
+  ~~~
+
+- springboot监听器
+
+  运行状态监控的功能；使用时倒入spring-boot-starter-actuator的依赖即可
+
+- 核心配置文件方式
+
+  application 和 bootstrap 文件；
+  	bootstrap 配置文件是系统级别的，用来加载外部配置，如配置中心的配置信息，也可以用来定义系统不会变化的属	性.bootstatp 文件的加载先于application文件；
+  	application 配置文件是应用级别的，是当前应用的配置文件；
+
+- springboot如何使用xml配置
+
+  @Configuration和@ImportResource 配置即可,location传入的是一个字符串数组,所以可以传入多个xml配	置.
+  	如：@ImportResource(locations = {"classpath:beans.xml"})
+
+  ​	
 
 ### Springcloud常用注解
 
