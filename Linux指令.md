@@ -157,3 +157,14 @@ vim rabbitmq.config
 
 
 
+### curl命令
+
+~~~shell
+不带有任何参数时，curl 就是发出 GET 请求
+curl https://www.baidu.com
+
+curl -d 'uuid=20ad806ac1a0408d9923695c6988c2ba_0' -X POST https://jcloud.gyuncai.cn/signature/get_contract_image
+
+https://www.ruanyifeng.com/blog/2019/09/curl-reference.html
+~~~
+
