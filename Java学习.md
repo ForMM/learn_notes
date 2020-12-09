@@ -151,7 +151,20 @@ java -Djava.ext.dirs=$JAVA_HOME/jre/lib/ext;d:\tmp\lib -jar d:\tmp\contract-base
    同步阻塞IO，数据的读写必须阻塞在一个线程内等待其完成。
 
    同步非阻塞IO，单线程写数据到buffer，同时可以去做其他的事情，当数据读取到buffer后，线程再继续处理数据。
-   	
+   
+   NIO是一种同步非阻塞的IO模型，java.nio包提供了`Channel` 、`Selector`、`Buffer` 等抽象。
+   
+   - Buffer
+   
+     IO面向流，NIO面向缓冲区。Buffer是一个对象，包含要写入或读出的数据。所有的数据都是用缓冲区处理。最常用的缓冲区是ByteBuffer，每一种java基本类型都对应有一种缓冲区。
+   
+   - Channel
+   
+     NIO通过通道进行读写，通道是双向的，可读也可写。而流是单向的。无论读写只能和Buffer交互。
+   
+   - Selector
+   
+     选择器用于使用单个线程处理多个通道。因此，它需要较少的线程来处理这些通道。线程之间的切换对于操作系统来说是昂贵的。 因此，为了提高系统效率选择器是有用的。
 
 
 	buffer（IO面向流，NIO面向缓冲区）

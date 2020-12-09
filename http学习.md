@@ -148,3 +148,26 @@ https://blog.csdn.net/u014644574/article/details/83381303?utm_medium=distribute.
   服务器在响应消息中用Set-Cookie头将Cookie的内容回送给客户端，客户端在新的请求中将相同的内容携带在Cookie头中发送给服务器。从而实现会话的保持。
 
   ![cookie-1](\img\cookie-1.png)
+
+### web缓存
+
+WEB缓存(cache)位于Web服务器和客户端之间。
+
+缓存会根据请求保存输出内容的副本，例如html页面，图片，文件，当下一个请求来到的时候：如果是相同的URL，缓存直接使用副本响应访问请求，而不是向源服务器再次发送请求。
+
+http协议中拓展消息头：
+
+**Expires**：指示响应内容过期的时间，格林威治时间GMT
+
+   **Cache-Control**：更细致的控制缓存的内容
+
+   **Last-Modified**：响应中资源最后一次修改的时间
+
+   **ETag**：响应中资源的校验值，在服务器上某个时段是唯一标识的。
+
+   **Date**：服务器的时间
+
+   **If-Modified-Since**：客户端存取的该资源最后一次修改的时间，同Last-Modified。
+
+   **If-None-Match**：客户端存取的该资源的检验值，同ETag。
+
