@@ -34,8 +34,7 @@ hotspot
 
 #### 垃圾收集算法
 
-JVM堆主要分为新时代、老年代、元空间（jdk1.7称为永久代）。新时代又分为eden区、survivous0区（s0）、survicous1区（是
-s1）。新生代和老年代的大小比例（1:2）新生代中区域比例（8：1：1）
+JVM堆主要分为新时代、老年代、元空间（jdk1.7称为永久代）。新时代又分为eden区、survivous0区（s0）、survicous1区（s1）。新生代和老年代的大小比例（1:2）新生代中区域比例（8：1：1）
 eden区存放new或newinstance的对象。s0和s1一样大。
 第一次GC（yong GC 或 minor GC）: 
 
