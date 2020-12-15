@@ -103,6 +103,45 @@
 
 6. 将对称加密的数据传递给客户端，客户端使用非对称解密，得到服务器发送的数据，完成第二次HTTP请求。
 
+### SSL协议请求过程分析
+
+![http-6](\img\http-6.png)
+
+ClientHello过程：版本号、客户端随机数、密码套件信息、压缩方式、扩展信息等成员。
+
+~~~
+*** ClientHello, TLSv1.2
+RandomCookie:  GMT: 1590739114 bytes = { 224, 123, 128, 208, 217, 216, 109, 177, 159, 189, 159, 121, 179, 143, 54, 96, 209, 247, 164, 149, 24, 136, 227, 191, 171, 233, 89, 198 }
+Session ID:  {}
+Cipher Suites: [TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256, 
+TLS_DHE_RSA_WITH_AES_128_CBC_SHA256, TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, 
+TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_GCM_SHA256, 
+TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_DSS_WITH_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, 
+SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV]
+Compression Methods:  { 0 }
+Extension elliptic_curves, curve names: {secp256r1, secp384r1, secp521r1, sect283k1, sect283r1, sect409k1, sect409r1, sect571k1, sect571r1, secp256k1}
+Extension ec_point_formats, formats: [uncompressed]
+Extension signature_algorithms, signature_algorithms: SHA512withECDSA, SHA512withRSA, SHA384withECDSA, SHA384withRSA, SHA256withECDSA, SHA256withRSA, SHA256withDSA, SHA1withECDSA, SHA1withRSA, SHA1withDSA
+Extension server_name, server_name: [type=host_name (0), value=jcloud.gyuncai.cn]
+***
+*** ServerHello, TLSv1.2
+RandomCookie:  GMT: -1031972689 bytes = { 61, 61, 171, 195, 167, 159, 124, 91, 175, 232, 148, 213, 22, 60, 144, 236, 49, 177, 84, 109, 78, 13, 138, 208, 84, 4, 243, 64 }
+Session ID:  {247, 126, 138, 171, 46, 187, 24, 39, 120, 238, 182, 255, 68, 222, 7, 30, 154, 176, 241, 88, 106, 227, 141, 38, 48, 41, 9, 107, 40, 189, 131, 95}
+Cipher Suite: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+Compression Method: 0
+Extension renegotiation_info, renegotiated_connection: <empty>
+Extension server_name, server_name: 
+Extension ec_point_formats, formats: [uncompressed, ansiX962_compressed_prime, ansiX962_compressed_char2]
+***
+~~~
+
+~~~
+Security.removeProvider("SunEC");
+这个语句移除了一些加密组件，当启动时候本来会加载jdk下安全包的加密组件，这个语句移除了导致客户端的https请求支持的组件，我们这边不支持导致ssl协议连接握手失败。
+~~~
+
+https://guoxiaodong.blog.csdn.net/article/details/52469674?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-4.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-4.control
+
 ### 浏览器如何验证HTTPS证书的合法性
 
 1. 验证浏览器中“受信任的根证书颁发机构”是否存在颁发该SSL证书的机构
