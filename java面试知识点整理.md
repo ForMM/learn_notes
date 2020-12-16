@@ -542,3 +542,11 @@ Return
 3. mysql的优化（配置引擎、索引、锁）
 4. 锁的模型
 
+
+
+赛意：
+
+1. springboot的注解怎么实现
+2. java的十进制转二进制
+3. 多线程的callable实现非阻塞，callable与runnable的区别
+4. mysql的优化 ，4个逗号隔开的一恶搞字符串，怎么生成四条分隔后的数据（行转列）
