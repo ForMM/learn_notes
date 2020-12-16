@@ -1,3 +1,24 @@
+#### 线程池原理
+
+~~~java
+public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue,
+                              RejectedExecutionHandler handler)
+~~~
+
+- 主要参数
+  - 核心线程数：提交一个任务，线程池创建一个新线程执行任务，直到当前线程数等于corePoolSize；如果继续提交的任务被保存到阻塞队列，等待被执行。
+  - 最大线程数
+  - 线程空闲时的存活时间
+  - 线程空闲时的存活时间单位
+  - 任务队列
+  - 拒绝策略
+- 关闭线程池的方式
+- 底层实现原理
+
 #### 什么是死锁？怎么避免死锁？
 
 死锁是两个或两个以上线程互相持有对方需要的资源，导致这些线程处于等待状态，不能继续执行。当线程进入synchronized代码块时，便占有了该资源，直到执行完该代码块才会释放资源，在这个期间，其他线程无法占用资源。当多个线程互相持有对方资源，会互相等待对方释放资源，如果线程不主动释放资源，就会产生死锁。
@@ -255,7 +276,7 @@ LockSupport.unpark(t1)
     1. 获取锁时，使用setnx加锁，并使用expire设置为锁添加一个有效期，超过有效期则自动释放锁，锁的value值为一个随机的uuid，通过此再释放锁的时候进行判断。
 
        	2. 获取锁时还需要设置一个获取超时时间，若超过这个时间则放弃获取锁。
-       	3. 释放锁时，通过uuid判断是不是该锁，若是该锁，则执行del进行锁释放。
+          	3. 释放锁时，通过uuid判断是不是该锁，若是该锁，则执行del进行锁释放。
 
   - 具体实现：
 
