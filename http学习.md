@@ -87,7 +87,7 @@
 
 ​	HTTPS的请求中使用了非对称加密算法。非对称加密，加密和解密过程使用不同的密钥，一个公钥，对外公开，一个私钥，仅是解密端拥有。由于公钥和私钥是分开的，非对称加密算法安全级别高，加密密文长度有限制，适用于对少量数据进行加密，速度较慢。
 
-![http-1](\img\http-1.png)
+![http-1](.\img\http-1.png)
 
 上述过程就是两次HTTP请求，其详细过程如下：
 
@@ -105,7 +105,7 @@
 
 ### SSL协议请求过程分析
 
-![http-6](\img\http-6.png)
+![http-6](.\img\http-6.png)
 
 ClientHello过程：版本号、客户端随机数、密码套件信息、压缩方式、扩展信息等成员。
 
@@ -145,10 +145,16 @@ https://guoxiaodong.blog.csdn.net/article/details/52469674?utm_medium=distribute
 ### 浏览器如何验证HTTPS证书的合法性
 
 1. 验证浏览器中“受信任的根证书颁发机构”是否存在颁发该SSL证书的机构
+
 2. 检查证书有没有被证书颁发机构吊销
+
 3. 验证该网站的SSL证书是否过期
+
 4. 审核该SSL证书的网站的域名是否与证书中的域名一致
+
 5. 该网站有没有被列入欺诈网站黑名单
+
+   https://blog.csdn.net/jasonhwang/article/details/2344768?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.control
 
 ### HTTPS和HTTP区别
 
