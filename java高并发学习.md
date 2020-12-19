@@ -12,16 +12,30 @@
 
   **Future就是对于具体的Runnable或者Callable任务的执行结果进行**
 
-  **取消、查询是否完成、获取结果、设置结果操作**。
+  **取消、查询是否完成、获取结果、设置结果操作**。get方法会产生阻塞。
+
+  ~~~java
+  public interface Future<V> {
+      boolean cancel(boolean mayInterruptIfRunning);
+      boolean isCancelled();
+      boolean isDone();
+      V get() throws InterruptedException, ExecutionException;
+      V get(long timeout, TimeUnit unit)
+          throws InterruptedException, ExecutionException, TimeoutException;
+  }
+  ~~~
 
 - FutureTask
 
-- 
+  FutureTask类实现了RunnableFuture接口，RunnableFuture继承了Runnable接口和Future接口，所以FutureTask作为Runnable被线程执行，又可以作为Future得到Callable的返回值。
+
+  线程池中的submit方法中用到了它。
+
+- CompletableFuture
 
   
 
   
-
 #### 线程池原理
 
 ~~~java
