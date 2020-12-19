@@ -12,16 +12,30 @@
 
   **Future就是对于具体的Runnable或者Callable任务的执行结果进行**
 
-  **取消、查询是否完成、获取结果、设置结果操作**。
+  **取消、查询是否完成、获取结果、设置结果操作**。get方法会产生阻塞。
+
+  ~~~java
+  public interface Future<V> {
+      boolean cancel(boolean mayInterruptIfRunning);
+      boolean isCancelled();
+      boolean isDone();
+      V get() throws InterruptedException, ExecutionException;
+      V get(long timeout, TimeUnit unit)
+          throws InterruptedException, ExecutionException, TimeoutException;
+  }
+  ~~~
 
 - FutureTask
 
-- 
+  FutureTask类实现了RunnableFuture接口，RunnableFuture继承了Runnable接口和Future接口，所以FutureTask作为Runnable被线程执行，又可以作为Future得到Callable的返回值。
+
+  线程池中的submit方法中用到了它。
+
+- CompletableFuture
 
   
 
   
-
 #### 线程池原理
 
 ~~~java
@@ -35,12 +49,28 @@ public ThreadPoolExecutor(int corePoolSize,
 
 - 主要参数
   - 核心线程数：提交一个任务，线程池创建一个新线程执行任务，直到当前线程数等于corePoolSize；如果继续提交的任务被保存到阻塞队列，等待被执行。
-  - 最大线程数
+  - 最大线程数:
   - 线程空闲时的存活时间
   - 线程空闲时的存活时间单位
   - 任务队列
   - 拒绝策略
+  
+- 线程池状态
+
+  - RUNNING:运行状态，值也是最小的，刚创建的线程池就是此状态
+
+  - SHUTDOWN:停工状态，不再接收新任务，已经接收的会继续执行
+
+  - STOP:停止状态，不再接收新任务，已经接收正在执行的，也会中断
+
+  - TIDYING:清空状态， 所有任务都停止了，工作的线程也全部结束了
+
+  - TERMINATED:终止状态，线程池已销毁
+
+    <img src="./img/thradpool.png" alt="thradpool" style="zoom:50%;" />
+
 - 关闭线程池的方式
+
 - 底层实现原理
 #### 什么是死锁？怎么避免死锁？
 
