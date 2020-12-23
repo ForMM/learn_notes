@@ -1,3 +1,11 @@
+#### RPC学习
+
+1. 概念：远程过程调用，简单的理解是一个节点请求另一个节点提供的服务
+2. 流行的开源 RPC 框架:阿里的 Dubbo/Dubbox、Facebook 的 Thrift、Google 的 gRPC、Twitter 的 Finagle 
+3. 完整的RPC框架
+
+https://developer.51cto.com/art/201906/597963.htm
+
 #### Dubbo里面有哪几种节点角色
 
 - Provider：服务提供方
