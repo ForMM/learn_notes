@@ -1,8 +1,36 @@
 #### RPC学习
 
 1. 概念：远程过程调用，简单的理解是一个节点请求另一个节点提供的服务
-2. 流行的开源 RPC 框架:阿里的 Dubbo/Dubbox、Facebook 的 Thrift、Google 的 gRPC、Twitter 的 Finagle 
-3. 完整的RPC框架
+
+2. 流行的开源 RPC 框架: 阿里的 Dubbo/Dubbox、Facebook 的 Thrift、Google 的 gRPC、Twitter 的 Finagle 
+
+3. 完整的RPC框架，包含了服务发现、负载、容错、网络传输、序列化等组件，其中“RPC 协议”就指明了程序如何进行网络传输和序列化。
+
+   ![dubbo-1](./img/dubbo-1.jpg)
+
+4. RPC核心功能
+
+   一个 RPC 的核心功能主要有 5 个部分组成，分别是：客户端、客户端 Stub、网络传输模块、服务端 Stub、服务端等。
+
+   ![rpc-2](./img/rpc-2.jpg)
+
+   - 客户端(Client)：服务调用方。
+   - 客户端存根(Client Stub)：存放服务端地址信息，将客户端的请求参数数据信息打包成网络消息，再通过网络传输发送给服务端。
+   - 服务端存根(Server Stub)：接收客户端发送过来的请求消息并进行解包，然后再调用本地服务进行处理。
+   - 服务端(Server)：服务的真正提供者。
+   - Network Service：底层传输，可以是 TCP 或 HTTP。
+
+5. RPC核心功能实现
+
+   最简单的方式要实现三个技术点，分别是：
+
+   - 服务寻址
+   - 数据流的序列化和反序列化
+   - 网络传输
+
+6. 
+
+   
 
 https://developer.51cto.com/art/201906/597963.htm
 
