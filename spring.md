@@ -156,7 +156,7 @@ https://blog.csdn.net/qukaiwei/article/details/50367761
 
 - ##### 事务特性（4种）：
 
-  原子性(atomicity)：强调事务的不可分割
+  原子性(atomicity)：事务是一个原子操作单元，其对数据的修改，要么全都执行，要么全都不执行。
 
   一致性(consistency)：事务的执行前后数据完整性保存一致
 
