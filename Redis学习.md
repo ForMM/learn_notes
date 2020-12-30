@@ -212,13 +212,13 @@ setnx com:animal uu;(只有在key不存在时设置key的值)  (返回值0或1)
 
 多个redis节点网络互联（ping-pong机制），数据共享
 
-redis-cluster把所有的物理节点映射到[0-16383]slot 哈希槽上（不一定是平均分配）,cluster 负责维护node<->slot<->value； 集群中放置一个 key-value 时，根据 CRC16(key) mod 16384的值，决定将一个key放到哪个桶中。
+redis-cluster把所有的物理节点映射到[0-16383]slot 哈希槽上（不一定是平均分配）,cluster 负责维护node<->slot<->value； 集群中放置一个 key-value 时，根据 CRC16(key) mod 16383的值，决定将一个key放到哪个桶中。
 
 ​		所有的节点都是一主一从或一主多从，其中的slave不提供服务，备用
 ​		不支持同时处理多个key（mset、mget），因为redis要把key均匀分布在各个节点上，并发量高的话同时创建key-value导致不可预测的情况
 ​		支持在线增加、删除节点
 ​		客户端可以连接任何一个主节点进行读写
-​		
+​		<img src=".\img\redis-cluster.png" alt="redis-cluster" style="zoom:50%;" />
 
 		具体搭建可参照博客：https://blog.csdn.net/miss1181248983/article/details/90056960
 
