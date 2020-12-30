@@ -87,7 +87,7 @@ public ThreadPoolExecutor(int corePoolSize,
   
   - 任务队列：用于保存任务的阻塞队列，**ArrayBlockingQueue, LinkedBlockingQueue, SynchronousQueue, PriorityBlockingQueue**。
   
-  - 拒绝策略：
+  - 拒绝策略：有界队列的话，线程池里的线程数达到最大线程数，然后有界队列已满触发拒绝策略；无界队列的话，线程池里线程数最大就是核心线程数，永远达不到最大线程数，超过核心线程后每次提交的任务都会往无界队列里添加，直至系统资源耗尽。
   
     AbortPolicy： 直接拒绝所提交的任务，并抛出**RejectedExecutionException**异常；
   
@@ -227,7 +227,7 @@ public void execute(Runnable command) {
 CPU要读取一个数据时，首先从一级缓存中查找，如果没有找到再从二级缓存中查找，如果还是没有就从三级缓存或内存中查找，每个cpu有且只有一套自己的缓存。
 ```
 
-![jvm-2](D:/log/日志记录/img/jvm-2.png)
+![jvm-2](./img/jvm-2.png)
 
 ​	**在不同CPU执行的不同线程对同一个变量的缓存值不同**,这样存在不同处理器缓存不一致问题。内存屏障是来解决这样的现象。硬件层的内存屏障分为两种：`Load Barrier` 和 `Store Barrier`即读屏障和写屏障。【内存屏障是硬件层的】
 
