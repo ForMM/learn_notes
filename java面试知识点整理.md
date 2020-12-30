@@ -550,3 +550,11 @@ Return
 2. java的十进制转二进制
 3. 多线程的callable实现非阻塞，callable与runnable的区别
 4. mysql的优化 ，4个逗号隔开的一恶搞字符串，怎么生成四条分隔后的数据（行转列）
+
+
+
+分布式cap
+
+eurua跟zookeeper的区别
+
+分布式锁redis和zookeeper的实现的区别，reddisson的实现方式
