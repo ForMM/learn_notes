@@ -472,7 +472,15 @@ LockSupport.unpark(t1)
 
   - 具体实现：
 
-    jedis(不可重入锁)、redission（可重入锁）
+    jedis(不可重入锁)、redission（可重入锁、Redlock）
+
+    
+
+    
+
+    redission的具体实现可以查看：
+
+    https://blog.csdn.net/liuxiao723846/article/details/88131065?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3.control
 
   - redis分布式环境获取和释放锁（Redlock）
 
@@ -483,6 +491,38 @@ LockSupport.unpark(t1)
     5. 如果因为某些原因，获取锁失败（*没有*在至少N/2+1个Redis实例取到锁或者取锁时间已经超过了有效时间），客户端应该在所有的Redis实例上进行解锁（即便某些Redis实例根本就没有加锁成功）。
 
 - 基于zookeeper实现分布式锁
+
+  
+
+- 各种实现的对比
+
+  **数据库分布式锁实现**
+  缺点：
+
+  1.db操作性能较差，并且有锁表的风险
+  2.非阻塞操作失败后，需要轮询，占用cpu资源;
+  3.长时间不commit或者长时间轮询，可能会占用较多连接资源
+
+  **Redis(缓存)分布式锁实现**
+  缺点：
+
+  1.锁删除失败 过期时间不好控制
+  2.非阻塞，操作失败后，需要轮询，占用cpu资源;
+
+  **ZK分布式锁实现**
+  缺点：性能不如redis实现，主要原因是写操作（获取锁释放锁）都需要在Leader上执行，然后同步到follower。
+
+  总之：ZooKeeper有较好的性能和可靠性。
+
+   
+
+  从理解的难易程度角度（从低到高）数据库 > 缓存 > Zookeeper
+
+  从实现的复杂性角度（从低到高）Zookeeper >= 缓存 > 数据库
+
+  从性能角度（从高到低）缓存 > Zookeeper >= 数据库
+
+  从可靠性角度（从高到低）Zookeeper > 缓存 > 数据库
 
 - 
 
