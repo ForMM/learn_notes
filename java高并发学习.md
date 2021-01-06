@@ -474,13 +474,128 @@ LockSupport.unpark(t1)
 
     jedis(不可重入锁)、redission（可重入锁、Redlock）
 
-    
-
-    
-
     redission的具体实现可以查看：
 
     https://blog.csdn.net/liuxiao723846/article/details/88131065?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3.control
+
+  - redisson实现原理
+
+    ![redisson-lock](./img/redisson-lock.png)
+
+    ~~~java
+    if (redis.call('exists', KEYS[1]) == 0) then 
+            redis.call('hset', KEYS[1], ARGV[2], 1);
+             redis.call('pexpire', KEYS[1], ARGV[1]); 
+             return nil;
+              end;
+    if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then
+            redis.call('hincrby', KEYS[1], ARGV[2], 1);
+            redis.call('pexpire', KEYS[1], ARGV[1]); 
+            return nil;
+            end;
+    return redis.call('pttl', KEYS[1]);
+    ~~~
+
+    **为什么使用lua脚本**
+
+    ​	因为一大堆复杂的业务逻辑，可以通过封装在lua脚本中发送给redis，保证这段复杂业务逻辑执行的原子性
+
+    ​	KEYS[1]:表示你加锁的那个key，比如说
+    ​	RLock lock = redisson.getLock(“myLock”);
+    ​	这里你自己设置了加锁的那个锁key就是“myLock”。
+    ​	ARGV[1]:表示锁的有效期，默认30s
+    ​	ARGV[2]:表示表示加锁的客户端ID,类似于下面这样：
+    ​	8743c9c0-0795-4907-87fd-6c719a6b4586:1
+
+    **加锁机制**
+
+    ​	lua中第一个if判断语句，就是用“exists myLock”命令判断一下，如果你要加锁的那个锁key不存在的话，你就进行加锁。
+
+    如何加锁呢？很简单，用下面的hset命令：
+
+    ```
+    hset myLock 8743c9c0-0795-4907-87fd-6c719a6b4586:1 1
+    ```
+
+    此时的myLock锁key的数据结构是:
+
+    ```
+    myLock:
+        {
+            8743c9c0-0795-4907-87fd-6c719a6b4586:1 1
+        }
+    ```
+
+    接着会执行“pexpire myLock 30000”命令，设置myLock这个锁key的生存时间是30秒(默认)
+
+    **锁互斥机制**
+
+    ​	如果在这个时候，另一个客户端(客户端2)来尝试加锁，执行了同样的一段lua脚本，会怎样呢？
+
+    第一个if判断会执行“exists myLock”，发现myLock这个锁key已经存在了。
+
+    接着第二个if判断会执行“hexists mylock 客户端id”，来判断myLock锁key的hash数据结构中，是否包含客户端2的ID，但是明显不是的，因为那里包含的是客户端1的ID。
+
+    所以，客户端2会获取到pttl myLock返回的一个数字，这个数字代表了myLock这个锁key的剩余生存时间。
+
+    比如还剩15000毫秒的生存时间。此时客户端2会进入一个while循环，不停的尝试加锁。
+
+    **可重入加锁机制**
+
+    ​	如果客户端1已经持有这把锁，可重入的加锁会怎么样呢
+
+    ```
+    #重入加锁
+    RLock lock = redisson.getLock("myLock")
+    lock.lock();
+    //业务代码
+    lock.lock();
+    //业务代码
+    lock.unlock();
+    lock.unlock();
+    ```
+
+    分析上面lua代码
+    第一个if判断不成立，“exists myLock” 会显示锁key已经存在了
+
+    第二个if会成立，因为myLock的hash数据结构中包含的客户端1的ID，也就是“8743c9c0-0795-4907-87fd-6c719a6b4586:1”
+
+    此时就会执行可重入加锁的逻辑，用incrby这个命令，对客户端1的加锁次数，累加1：
+
+    ```
+    incrby myLock 8743c9c0-0795-4907-87fd-6c71a6b4586:1  1
+    ```
+
+    此时myLock数据结构变为下面这样：
+
+    ```
+    myLock:
+        {
+            8743c9c0-0795-4907-87fd-6c719a6b4586:1  2
+        }
+    ```
+
+    **释放锁机制**
+
+    ​	执行lock.unlock()，就可以释放分布式锁，此时的业务逻辑也是非常简单的。
+
+    就是每次都对myLock数据结构中的那个加锁次数减1。如果发现加锁次数是0了，说明这个客户端已经不再持有锁了，此时就会用：“del myLock”命令，从redis里删除这个key。
+
+    然后另外的客户端2就可以尝试完成加锁了。
+
+    这就是所谓的分布式锁的开源Redisson框架的实现机制。
+
+    一般我们在生产系统中，可以用Redisson框架提供的这个类库来基于redis进行分布式锁的加锁与释放锁。
+
+    **watch dog机制**
+
+    1. 客户端1加锁的锁key默认生存时间才30秒，如果超过了30秒，客户端1还想一直持有这把锁，怎么办呢？Redisson中客户端1一旦加锁成功，就会启动一个watch dog看门狗，他是一个后台线程，会每隔10秒检查一下，如果客户端1还持有锁key，那么就会不断的延长锁key的生存时间。
+
+    2. 如果负责存储这个分布式锁的Redission节点宕机后，而且这个锁正好处于锁住的状态时，这个锁会出现锁死的状态，为了避免这种情况的发生，Redisson提供了一个监控锁的看门狗，它的作用是在Redisson实例被关闭前，不断的延长锁的有效期。默认情况下，看门狗的续期时间是30s，也可以通过修改Config.lockWatchdogTimeout来另行指定。
+
+    **缺点**
+
+    ​	你对某个redis master实例，写入了myLock这种锁key的value，此时会异步复制给对应的master slave实例。但是这个过程中一旦发生redis master宕机，主备切换，redis slave变为了redis master。接着就会导致，客户端2来尝试加锁的时候，在新的redis master上完成了加锁，而客户端1也以为自己成功加了锁。此时就会导致多个客户端对一个分布式锁完成了加锁。这时系统在业务上一定会出现问题，导致脏数据的产生。所以这个就是redis cluster，或者是redis master-slave架构的主从异步复制导致的redis分布式锁的最大缺陷：在redis master实例宕机的时候，可能导致多个客户端同时完成加锁。
 
   - redis分布式环境获取和释放锁（Redlock）
 
