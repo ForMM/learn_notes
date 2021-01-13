@@ -1,5 +1,11 @@
 # zookeeper学习
 
+### zookeeper使用场景
+
+1. 统一配置：把配置放在ZooKeeper的节点中维护，当配置变更时，客户端可以收到变更的通知，并应用最新的配置。
+2. 集群管理：集群中的节点，创建ephemeral的节点，一旦断开连接，ephemeral的节点会消失，其它的集群机器可以收到消息。
+3. 分布式锁：多个客户端发起节点创建操作，只有一个客户端创建成功，从而获得锁。
+
 ### zookeeper特性
 
 1. 强一致性
@@ -64,7 +70,36 @@ zookeeper是一个分布式协调服务，可以实现统一命名服务、状�
 
   客户端注册监听它关心的目录节点，当目录节点发生变化（数据改变、被删除、子目录节点增加删除）时，zookeeper会通知客户端。
 
-- 
+  **zookeeper客户端和服务端的连接状态**
+
+  1. KeeperState.Expired：客户端和服务器在ticktime的时间周期内，是要发送心跳通知的。这是租约协议的一个实现。客户端发送request，告诉服务器其上一个租约时间，服务器收到这个请求后，告诉客户端其下一个租约时间是哪个时间点。当客户端时间戳达到最后一个租约时间，而没有收到服务器发来的任何新租约时间，即认为自己下线（此后客户端会废弃这次连接，并试图重新建立连接）。这个过期状态就是Expired状态
+  2. KeeperState.Disconnected：当客户端断开一个连接（可能是租约期满，也可能是客户端主动断开）这是客户端和服务器的连接就是Disconnected状态
+  3. KeeperState.SyncConnected：一旦客户端和服务器的某一个节点建立连接（注意，虽然集群有多个节点，但是客户端一次连接到一个节点就行了），并完成一次version、zxid的同步，这时的客户端和服务器的连接状态就是SyncConnected
+  4. KeeperState.AuthFailed：zookeeper客户端进行连接认证失败时，发生该状态
+
+  **zookeeper的watch事件**
+
+  | zookeeper事件                 | 事件含义                                                     |
+  | ----------------------------- | ------------------------------------------------------------ |
+  | EventType.NodeCreated         | 当node-x这个节点被创建时，该事件被触发                       |
+  | EventType.NodeChildrenChanged | 当node-x这个节点的直接子节点被创建、被删除、子节点数据发生变更时，该事件被触发。 |
+  | EventType.NodeDataChanged     | 当node-x这个节点的数据发生变更时，该事件被触发               |
+  | EventType.NodeDeleted         | 当node-x这个节点被删除时，该事件被触发。                     |
+  | EventType.None                | 当zookeeper客户端的连接状态发生变更时，即KeeperState.Expired、KeeperState.Disconnected、KeeperState.SyncConnected、KeeperState.AuthFailed状态切换时，描述的事件类型为EventType.None |
+
+  ![zookeeper-2](.\img\zookeeper-2.png)
+
+Znode发生变化（Znode本身的增加，删除，修改，以及子Znode的变化）可以通过Watch机制通知到客户端。那么要实现Watch，就必须实现org.apache.zookeeper.Watcher接口，并且将实现类的对象传入到可以Watch的方法中。Zookeeper中所有读操作（getData()，getChildren()，exists()）都可以设置Watch选项。Watch事件具有one-time trigger（一次性触发）的特性，如果Watch监视的Znode有变化，那么就会通知设置该Watch的客户端。
+
+zk提供的原语包含：
+
+1. create
+2. delete
+3. exists
+4. get data
+5. set data
+6. get chiledren
+7. sync
 
 ### zookeeper单机模式安装
 
@@ -230,4 +265,3 @@ https://www.cnblogs.com/liuqijia/p/11456106.html
 
 ### 分布式锁的实现
 
-### zookeeper的服务机制
