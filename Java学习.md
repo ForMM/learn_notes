@@ -184,6 +184,14 @@ java -Djava.ext.dirs=$JAVA_HOME/jre/lib/ext;d:\tmp\lib -jar d:\tmp\contract-base
 这个很好理解，每次请求到达服务器，都是从connect开始，connect成功后，服务端开始准备accept，准备就绪，开始读数据，并处理，最后写回数据返回。
 所以，当SocketChannel有对应的事件发生时，Selector都可以观察到，并进行相应的处理。
 
+一个SelectionKey键表示了一个特定的通道对象和一个特定的选择器对象之间的注册关系。
+
+​	select()方法返回的int值表示有多少通道已经就绪，是自上次调用select()方法后有多少通道变成就绪状态。之前在调用select()时进入就绪的通道不会在本次调用中被计入，而在前一次select()调用进入就绪但现在已经不在于就绪状态的通道也不会被计入。例如：首次调用select()方法，如果有一个通道变成了就绪状态，返回了1，若再次调用select()方法，如果一个另一个通道就绪了，它会再次返回1.如果对第一个就绪的Channel没有做任何操作，现在就有两个就绪的通道，但在每次select()方法调用之间，只有一个通道就绪了。
+
+
+
+
+
 使用场景：
 
 netty
