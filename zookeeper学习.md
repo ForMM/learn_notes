@@ -265,3 +265,14 @@ https://www.cnblogs.com/liuqijia/p/11456106.html
 
 ### 分布式锁的实现
 
+1. zookeeper的每一个节点都是一个天然的顺序信号发送器。在每一个节点下面创建子节点时，只要选择的创建类型是有序（EPHEMERAL_SEQUENTIAL 临时有序或者PERSISTENT_SEQUENTIAL 永久有序）类型，那么，新的子节点后面，会加上一个次序编号。这个次序编号，是上一个生成的次序编号加一。
+
+2. zookeeper节点递增性，可以规定节点编号最小的那个获取锁。一个zookeeper分布式锁，首先需要创建一个父节点，尽量是持久节点（PERSISTENT类型），然后每个要获得锁的线程都会在这个节点下创建个临时顺序节点，由于序号的递增性，可以规定排号最小的那个获得锁。所以，每个线程在尝试占用锁之前，首先判断自己是排号是不是当前最小，如果是，则获取锁。
+
+3. zookeeper节点监听机制，可以保障占有锁的方式有序而且高效。每个线程抢占锁之前，先抢号创建自己的ZNode。同样，释放锁的时候，就需要删除抢号的Znode。抢号成功后，如果不是排号最小的节点，就处于等待通知的状态。等谁的通知呢？不需要其他人，只需要等前一个Znode 的通知就可以了。当前一个Znode 删除的时候，就是轮到了自己占有锁的时候。
+
+   Zookeeper的内部机制，能保证后面的节点能够正常的监听到删除和获得锁。在创建取号节点的时候，尽量创建临时znode 节点而不是永久znode 节点，一旦这个 znode 的客户端与Zookeeper集群服务器失去联系，这个临时 znode 也将自动删除。排在它后面的那个节点，也能收到删除事件，从而获得锁。
+
+   具体实现方式可以回顾工程：Apache curator的使用及zk分布式锁实现，Apache开源的curator的使用,有了curator,利用Java对zookeeper的操作变得极度便捷。
+
+   https://github.com/yujiasun/Distributed-Kit/blob/master/src/main/java/com/distributed/lock/zk/ZkReentrantLock.java

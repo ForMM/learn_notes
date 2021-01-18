@@ -196,3 +196,23 @@ java -Djava.ext.dirs=$JAVA_HOME/jre/lib/ext;d:\tmp\lib -jar d:\tmp\contract-base
 
 netty
 dubbo等rpc框架
+
+### Timer
+
+1. schedule（task，time）
+
+   task-所安排的任务  time-执行任务的时间
+
+2. schedule（task，time，period）
+
+   task-所要安排执行的任务 time-首次执行任务的时间 period-执行一次task的时间间隔，单位毫秒
+
+3. schedule(task,delay)
+
+   task-所要安排的任务  delay-执行任务前的延迟时间，单位毫秒
+
+4. schedule(task, delay,period)
+
+   在等待delay毫秒后首次执行task，每隔period毫秒重复执行task
+
+   
