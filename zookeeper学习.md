@@ -28,7 +28,7 @@
 
    来自同一个client的更新请求按其发送顺序依次执行
 
-### zookeeper是什么？
+### zookeeper是什么
 
 zookeeper是一个分布式协调服务，可以实现统一命名服务、状态同步服务、集群管理、分布式应用配置项的管理等。简单点说zookeeper=文件系统+监听通知服务。
 
@@ -210,9 +210,23 @@ ZK集群中每个Server，都保存一份数据副本。Zookeeper使用简单的
 
 ![zookeeper-3](./img/zookeeper-3.png)
 
-**广播模式**ZooKeeper Server会接受Client请求，所有的写请求都被转发给**领导者**，再由领导者将更新广播给**跟随者**。当半数以上的跟随者已经将修改**持久化**之后，领导者才会提交这个更新，然后客户端才会收到一个更新成功的响应。这个用来达成共识的协议被设计成具有原子性，因此每个修改要么成功要么失败。
+（ZAB）**广播模式**ZooKeeper Server会接受Client请求，所有的写请求都被转发给**领导者**，再由领导者将更新广播给**跟随者**。当半数以上的跟随者已经将修改**持久化**之后，领导者才会提交这个更新，然后客户端才会收到一个更新成功的响应。这个用来达成共识的协议被设计成具有原子性，因此每个修改要么成功要么失败。
 
 ![zookeeper-4](./img/zookeeper-4.png)
+
+ZAB协议的消息广播使用原子广播协议， **类似一个二阶段提交的过程** ，但又有所不同。
+
+1. 二阶段提交中，需要所有参与者反馈ACK后再发送Commit请求。要求所有参与者要么成功，要么失败。这样会产生严重的阻塞问题
+2. ZAB协议中，Leader等待半数以上的Follower成功反馈ACK即可，不需要收到全部的Follower反馈ACK。
+
+**消息广播过程：**
+
+1. 客户端发起写请求
+2. Leader将客户端请求信息转化为事务Proposal，同时为每个Proposal分配一个事务ID（Zxid）
+3. Leader为每个Follower单独分配一个FIFO的队列，将需要广播的Proposal依次放入到队列中
+4. Follower接收到Proposal后，首先将其以事务日志的方式写入到本地磁盘中，写入成功后给Leader反馈一个ACK响应
+5. Leader接收到半数以上Follower的ACK响应后，即认为消息发送成功，可以发送Commit消息
+6. Leader向所有Follower广播Commit消息，同时自身也会完成事务提交。Follower接收到Commit消息后也会完成事务的提交
 
 https://www.cnblogs.com/crazylqy/p/7132133.html
 
@@ -276,3 +290,9 @@ https://www.cnblogs.com/liuqijia/p/11456106.html
    具体实现方式可以回顾工程：Apache curator的使用及zk分布式锁实现，Apache开源的curator的使用,有了curator,利用Java对zookeeper的操作变得极度便捷。
 
    https://github.com/yujiasun/Distributed-Kit/blob/master/src/main/java/com/distributed/lock/zk/ZkReentrantLock.java
+   
+   https://www.cnblogs.com/windpoplar/p/11964314.html
+
+### 分布式id的实现
+
+​	可以通过通过节点版本号实现；

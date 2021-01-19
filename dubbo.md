@@ -104,7 +104,7 @@ https://developer.51cto.com/art/201906/597963.htm
 | dubbo:application | 应用信息配置，用于计算依赖关系                               |
 | dubbo:registry    | 注册中心配置                                                 |
 | dubbo:protocol    | 协议配置                                                     |
-| dubbo:service     | 服务配置                                                     |
+| dubbo:service     | 服务配置，需要暴露的接口                                     |
 | dubbo:reference   | 引用配置                                                     |
 | dubbo:monitor     | 监控中心配置                                                 |
 | dubbo:module      | 模块配置                                                     |
@@ -113,6 +113,16 @@ https://developer.51cto.com/art/201906/597963.htm
 | dubbo:method      | 方法配置（用于 ServiceConfig 和 ReferenceConfig 指定方法级的配置信息） |
 | dubbo:argument    | 参数配置                                                     |
 |                   |                                                              |
+
+dubbo:reference有很多属性配置，具体如下：
+
+| 属性名      | 说明                                          |
+| ----------- | --------------------------------------------- |
+| interface   | 调用服务的接口                                |
+| check       | 启动时检查提供者是否存在，true报错，false忽略 |
+| url         | 服务调用地址                                  |
+| loadbalance | 负载均衡策略                                  |
+| ref         | 关联接口的实现类                              |
 
 dubbo:service有很多属性配置，具体如下：
 
