@@ -233,19 +233,28 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
 
 - Eureka server
 
-   	Eureka server提供服务注册服务，各个节点启动后，会在Eureka server中进行注册，Eureka server就会存	储所有可用的服务节点。Eureka server本身也是一个服务，搭建单机版的Eureka server注册中心，需要配置取消Eureka server的自动注册逻辑。
-      Eureka server通过Register、Get、Renew等接口提供服务的注册、发现、心跳检测等服务。
+  	Eureka server提供服务注册服务，各个节点启动后，会在Eureka server中进行注册，Eureka server就会存储所有可用的服务节点。Eureka server本身也是一个服务，搭建单机版的Eureka server注册中心，需要配置取消Eureka server的自动注册逻辑。
+     Eureka server通过Register、Get、Renew等接口提供服务的注册、发现、心跳检测等服务。
 
   - 服务注册
-  - 接受eureka client发送过来的心跳检测
-  - 服务剔除（当一个client心跳超时）
-  - 服务下线（client请求关闭）
+
+    服务提供者启动时，会通过 Eureka Client 向 Eureka Server 注册信息，Eureka Server 会存储该服务的信息（服务的context-path、业务ip和端口、管理ip和端口，以及设置其他信息），Eureka Server 内部有二层缓存机制来维护整个注册表
+
+  - 提供注册表
+
+    服务消费者在调用服务时，如果eureka client没有缓存注册表的话，会从eureka server拉取最新的注册表缓存到本地
+
+  - 同步状态
+
+    Eureka Client 通过注册、心跳机制和 Eureka Server 同步当前客户端的状态。接受eureka client发送过来的心跳检测，当一个client心跳超时，服务剔除该服务；
+
   - 集群同步（不同eureka server中注册表信息同步）
+
   - 获取注册表中服务实例信息（每个eureka server同时也是一个eureka client，eureka server可以把自己注册到eureka集群中）
 
 - Eureka client
 
-  -  Eureka client是一个java客户端，同时也是一个内置的、使用轮询负载算法的负载均衡器。向Eureka server发送心跳，默认周期30秒。如果Eureka server在多个心跳周期内没有接收到某个服务的心跳，将会从中心移除掉这个节点，默认周期90秒。
+  -  Eureka client是一个java客户端，同时也是一个内置的、使用轮询负载算法的负载均衡器。向Eureka server发送心跳，默认周期30秒。如果Eureka server在多个心跳周期内没有接收到某个服务的心跳，将会从中心移除掉这个节点，默认周期90秒。Eureka Client 会拉取、更新和缓存 Eureka Server 中的信息。因此当所有的 Eureka Server 节点都宕掉，服务消费者依然可以使用缓存中的信息找到服务提供者，但是当服务有更改的时候会出现信息不一致。
   - 服务实例通过ConcurrentHashMap保存在内存中，在服务注册的过程中会先获取一个锁，防止其他线程对registry注册表进行数据操作，避免数据不一致。
     eureka server接收到client发送过来的InstanceInfo实例时，会先根据唯一的instanceId检查注册表中是否已存在该实例。
   - 如果没有该实例，说明这是一次新的注册服务，server会将InstanceInfo信息保存到注册表中
@@ -259,6 +268,8 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
 
   1. 启动时拉取注册表信息到本地缓存
   2. 更新本地注册表时同步到其他节点
+  
+  https://blog.csdn.net/qwe86314/article/details/94552801
 
 ### 雪崩
 
