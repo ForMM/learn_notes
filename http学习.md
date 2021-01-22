@@ -36,11 +36,11 @@
    User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36
    ~~~
 
-   ![http-2](\img\http-2.png)
+   ![http-2](.\img\http-2.png)
 
    请求数据
 
-   ![http-3](\img\http-3.png)
+   ![http-3](.\img\http-3.png)
 
 4. 服务器响应HTTP请求，返回HTML代码
 
@@ -48,11 +48,11 @@
 
    - 状态行
 
-     ![http-5](\img\http-5.png)
+     ![http-5](.\img\http-5.png)
 
    - 响应头部
 
-     ![http-4](\img\http-4.png)
+     ![http-4](.\img\http-4.png)
 
    - 响应数据
 
@@ -186,13 +186,13 @@ https://blog.csdn.net/u014644574/article/details/83381303?utm_medium=distribute.
 
   当客户端发起新的请求的时候，将在Cookie头中携带这个JSESSIONID。这样服务器能够找到这个客户端对应的Session。
 
-  ![seesion-1](\img\seesion-1.png)
+  ![seesion-1](.\img\seesion-1.png)
 
 - cookie流程
 
   服务器在响应消息中用Set-Cookie头将Cookie的内容回送给客户端，客户端在新的请求中将相同的内容携带在Cookie头中发送给服务器。从而实现会话的保持。
 
-  ![cookie-1](\img\cookie-1.png)
+  ![cookie-1](.\img\cookie-1.png)
 
 ### web缓存
 

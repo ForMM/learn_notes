@@ -192,7 +192,7 @@ SELECT title, price, type, create_time FROM t_zq_course WHERE title IN ( SELECT 
 
 ### mysql的逻辑结构
 
-![mysql-1](\img\mysql-1.png)
+![mysql-1](.\img\mysql-1.png)
 
 mysql架构总共分为三层：
 
@@ -202,7 +202,7 @@ mysql架构总共分为三层：
 
 ### 数据库工作流程
 
-![mysql-2](\img\mysql-2.jpg)
+![mysql-2](.\img\mysql-2.jpg)
 
 - 客户端连接
   1. 连接处理：客户端同数据库服务层建立TCP连接，连接管理模块会建立连接，并请求一个连接线程。如果连接池中有空闲的连接线程，则分配给这个连接，如果没有，在没有超过最大连接数的情况下，创建新的连接线程负责这个客户端。 

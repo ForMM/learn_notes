@@ -175,122 +175,6 @@ public ThreadPoolExecutor(int corePoolSize,
 	
 ~~~
 
-
-
-redis的实现原理、集群、数据存储、持久化
-
-~~~
-redis的数据结构及内部结构
-	String|list|set|sorted set|hash  内部通过sds（动态字符串）和链表来实现
-	
-	String主要操作指令：
-    set com:user aa;(设置指定值)
-    get com:user;(获取指定key的值)
-    setex com:animal 9 yy;(只有在key存在时设置值，并带上有效期：秒)
-    setnx com:animal uu;(只有在key不存在时设置key的值)  (返回值0或1)
-    incr key；（key对应的值加1）
-    decr key；（key对应的值减1）
-    用到场景：缓存数据、计数器、分布式锁
-	list（按照插入顺序排序）主要指令：
-		lpush key value；（插入头部）
-		rpop key；（移除最后面的元素，返回最后一个元素）		
-	set（无序集合，元素唯一性）主要指令：
-		sadd key value；（向集合中添加一个成员）
-		spop key；（移除并返回一个随机元素）
-	sorted set（有序集合，元素唯一性，通过分数给集合中的成员进行排序）主要操作指令：
-		zadd key score value；（向有序集合添加一个成员）
-		zrangebyscore key score min max; (通过分数取出有序集合中的成员)
-		zrem key value；（移除有序队列中成员）
-		用到的场景：延时队列
-	hash（）主要操作指令：
-		hset key filed value;(将哈希表中key的字段field的值设置成value)
-		hget key filed; （获取哈希表中key的字段field的值）
-
-数据持久化：
-	将内存中的数据保存到硬盘文件保证数据持久化。启动时从硬盘文件加载到内存恢复数据。
-	方式：RDB、AOF；
-      RDB文件是按一定周期将内存数据快照保存到硬盘的二进制文件。对应的文件名dump.rdb
-      实现方式：fork（）一个子线程，主线程复制数据到子线程的内存中，然后由子线程写入到临时文件中，用这个临时文件替换上次的快照文件，然后子线程退出，内存释放。（shutdown save slave命令都会触发）
-      AOF是把写命令写到一个日志文件里。
-	
-缓存雪崩、缓存穿透、缓存预热、缓存更新、缓存降级等问题
-	缓存雪崩：同一时间大面积key失效，导致本来访问缓存的量一下子要请求到数据库。导致数据库cpu和内存占有率变大，然后带来了一系列的连锁反应，导致系统崩溃。（可以给key的过期时间加个随机有效值）
-	缓存穿透：缓存中没有数据，数据库也可以对应的数据，导致既查询了缓存又查询了数据库。（1.过滤器限制请求到数据库2.也可以把空对象放到缓存里，不过设置一个过短的有效期）
-	缓存预热：有些数据需要经常查询，可以先手动或自动把数据库数据同步到缓存中
-	缓存更新：缓存失效
-	
-redis的过期策略以及内存淘汰机制
-	定期删除+惰性删除策略
-	定期删除，每隔100ms随机抽查key，过期了就删除。肯定不会抽查所有的key。
-	惰性删除，当获取key时，会判断他的过期时间，如果过期了就删除。
-	总有过期的key没有被删除，这时候就要配置内存淘汰机制。（redis.conf中有配置）
-	内存淘汰策略：
-	redis.conf 配置文件里配置最大内存maxmemory；当现有内存大于maxmemory，触发内存淘汰策略。
-	volatile-lru：最近最少使用的数据淘汰
-	volatile-random：从已设置过期时间的数据集(server.db[i].expires)中任意选择数据淘汰
-	volatile-ttl：挑选将要过期的数据淘汰，ttl值越大越优先被淘汰
-	allkeys-lru：从数据集(server.db[i].dict)中挑选最近最少使用的数据淘汰
-	allkeys-random：从数据集(server.db[i].dict)中选择任意数据淘汰
-	noeviction：不移除任何key，内存满时直接返回一个写错误 ，默认选项，一般不会选用
-		
-	
-redis为什么执行这么快？
-	1. 纯内存操作
-	2. 单线程操作，不需要切换上下文
-	3. 非阻塞IO多路复用机制
-	
-集群
-	主从模式
-	哨兵模式(sentinel模式)
-	cluster分布式模式
-	
-	1. 主从模式：主数据库和从数据库（master、slave）
-		主数据库提供读写操作，读写操作变化的数据自动同步到从数据库。
-		从数据库提供读操作，并且接收主数据库同步过来的数据
-		一个master可以拥有多个slave，一个slave只有从属于一个master
-		slave挂了不影响其他slave与master之间的同步，重新启动后会自动从master同步数据
-		master挂了，不会影响slave的读操作，但是redis提供不了写操作，只有master重启后才能写操作
-		master挂了后，slave也不会选举其中一个当master
-		
-		工作机制：slave启动后会向master发送sync命令（同步数据）。master接收到命令后会保存快照和缓存指令，然后将快照文件和指令发送给slave，slave接收到快照文件和缓存指令就加载快照文件也执行指令。这样保证数据一致性。
-		
-	2. 哨兵模式：监控redis集群的运行状况	
-		sentinel模式建立在主从模式基础上，如果master节点挂了，sentinel会在slave节点中选举一个来做master，其他的slave修改指向新的master。
-		原先的master重启后，充当slave节点，接收新的master同步数据。
-		sentinel也是一个集群，他们之间是会自动监控
-		一个sentinel或sentinel集群可以管理多个redis，也可以监控同一个redis
-		
-		工作机制：每个sentinel以每秒向master，slave和sentinel实例发送一次ping命令；如果一个实例距离最后一次有效回复ping命令时间超过设定的有效值，则这个实例被标志为主观下线。当一个master被标记为主观下线，则正在监视这个master的所有sentinel实例每秒一次的频率确认master的确进入主观下线状态。当有足够多的sentinel确认master的确进入了主观下线状态，则标记此master为客观下线状态。
-	
-	3. cluster模式（解决单机redis容量的问题，将存储数据进行分片存储到多个redis实例中）
-		多个redis节点网络互联，数据共享
-		所有的节点都是一主一从或一主多从，其中的slave不提供服务，备用
-		不支持同时处理多个key（mset、mget），因为redis要把key均匀分布在各个节点上，并发量高的话同时创建key-value导致不可预测的情况
-		支持在线增加、删除节点
-		客户端可以连接任何一个主节点进行读写
-		
-
-		具体搭建可参照博客：https://blog.csdn.net/miss1181248983/article/details/90056960
-		
-	
-redis支持lua脚本（项目中通过这个实现限流）
-	配置每秒的速率和每秒的容量值
-	
-项目中的场景有：
-1.缓存数据
-2.分布式锁
-3.延时队列
-4.限流
-~~~
-
-
-
-java的反射机制，注解原理
-
-~~~
-
-~~~
-
 Hashmap知识
 
 ~~~
@@ -389,7 +273,7 @@ spring ioc的实现原理
 	
 ~~~
 
-​		![v2-84ac79b31d7f08a12edf595df5e787ea_1440w](./v2-84ac79b31d7f08a12edf595df5e787ea_1440w.jpg)
+​		![v2-84ac79b31d7f08a12edf595df5e787ea_1440w](./img//v2-84ac79b31d7f08a12edf595df5e787ea_1440w.jpg)
 
 #### Spring aop
 
@@ -575,3 +459,12 @@ eurua跟zookeeper的区别
 无界队列使用线程池中最大核心数，有界队列又是多少
 
 mysql通过普通索引实现一次性查找整条数据
+
+
+
+华润：
+
+hashmap以最快的方式获取所有数据
+
+redis的持久化rdb和aop的优缺点
+
