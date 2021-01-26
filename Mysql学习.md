@@ -184,6 +184,22 @@ ALTER TABLE t_account ADD INDEX idx_account_status (`account`,`status`);
 #查找重名的数据有哪些？按创建时间降序
 SELECT title, price, type, create_time FROM t_zq_course WHERE title IN ( SELECT title FROM t_zq_course GROUP BY title HAVING (COUNT(*) > 1)) ORDER BY create_time DESC;
 
+#查询平台下时间段的签署文档次数
+SELECT
+	cont_id,
+	COUNT(*)
+FROM
+	t_yq_cont_target
+WHERE
+	`status` = 1
+AND id = '900001'
+AND stime >= '2021-01-01 00:00:00'
+AND stime <= '2021-01-30 14:15:52'
+GROUP BY
+	cont_id;
+	
+	
+	
 
 
 ~~~
