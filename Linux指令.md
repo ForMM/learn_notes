@@ -127,6 +127,7 @@ vim rabbitmq.config
 按键i进行插入编辑操作
 #搜索 the写法：/the     +回车
 
+直接退出：ctrl+Z
 ~~~
 
 ### linux进程通信的方式
