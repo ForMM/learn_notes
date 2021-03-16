@@ -71,9 +71,15 @@ springcloud相关组件：
   @Repository:确保DAO或者repositories提供异常转译；被ComponetScan发现并配置
   @Bean:用@Bean标注方法等价于XML中配置的bean
   @Value：注入Spring boot application.properties配置的属性的值
+  @Resource
   @Component：泛指组件，当组件不好归类的时候，我们可以使用这个注解进行标注
   @Configuration：标明为配置类
   ~~~
+
+  https://www.jianshu.com/p/70e7e7bc652e
+
+  1. spring @bean注解告诉方法，产生一个bean对象，然后这个bean对象交给spring管理。产生这个bean对象的方法只执行一次，然后把这个对象放到spring ioc容器中。
+  2. @Autowired，默认按照bytype注入，也就是bean的类型的来传入。如果需要指定名字，那么需要使`@Qualifier("这是bean的名字")`
 
 - springboot自动配置原理
 
@@ -223,6 +229,17 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
 
 3. 怎么对feign的请求拦截？
 
+4. @FeignClient注解原理
+
+   ~~~java
+   @FeignClient(name = "os-yunservice-api-service", url = "${os.yunservice.api.service.url:}",
+           configuration = FeignApiConfiguration.class, path = "${server.servlet.context-path:}")
+   ~~~
+
+   
+
+5. 
+
 ### Eureka
 
 - 分布式系统的CAP理论
@@ -254,7 +271,11 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
 
 - Eureka client
 
-  -  Eureka client是一个java客户端，同时也是一个内置的、使用轮询负载算法的负载均衡器。向Eureka server发送心跳，默认周期30秒。如果Eureka server在多个心跳周期内没有接收到某个服务的心跳，将会从中心移除掉这个节点，默认周期90秒。Eureka Client 会拉取、更新和缓存 Eureka Server 中的信息。因此当所有的 Eureka Server 节点都宕掉，服务消费者依然可以使用缓存中的信息找到服务提供者，但是当服务有更改的时候会出现信息不一致。
+  ![eureka-1](./img/eureka-1.png)
+
+  Eureka client工作流程如上。
+
+  - Eureka client是一个java客户端，同时也是一个内置的、使用轮询负载算法的负载均衡器。向Eureka server发送心跳，默认周期30秒。如果Eureka server在多个心跳周期内没有接收到某个服务的心跳，将会从中心移除掉这个节点，默认周期90秒。Eureka Client 会拉取、更新和缓存 Eureka Server 中的信息。因此当所有的 Eureka Server 节点都宕掉，服务消费者依然可以使用缓存中的信息找到服务提供者，但是当服务有更改的时候会出现信息不一致。
   - 服务实例通过ConcurrentHashMap保存在内存中，在服务注册的过程中会先获取一个锁，防止其他线程对registry注册表进行数据操作，避免数据不一致。
     eureka server接收到client发送过来的InstanceInfo实例时，会先根据唯一的instanceId检查注册表中是否已存在该实例。
   - 如果没有该实例，说明这是一次新的注册服务，server会将InstanceInfo信息保存到注册表中
@@ -268,6 +289,8 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
 
   1. 启动时拉取注册表信息到本地缓存
   2. 更新本地注册表时同步到其他节点
+  
+  Eureka Server集群的节点之间是通过http的方式进行同步的，网络存在不可靠性，为了保持高可用性，eureka server 牺牲了数据一致性，eureka server不满足 CAP找那个C（数据一致性）。
   
   https://blog.csdn.net/qwe86314/article/details/94552801
 

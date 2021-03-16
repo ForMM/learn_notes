@@ -1,6 +1,6 @@
 # Mybatis理解
 
-#### springboot集成Mybatis、Mybatis-generator
+### springboot集成Mybatis、Mybatis-generator
 
 1. pom.xml配置
 
@@ -140,6 +140,8 @@
 pom.xml文件所在的目录执行如下命令:
 mvn mybatis-generator:generate
 ~~~
+
+### springboot集成tk.mybatis
 
 
 
