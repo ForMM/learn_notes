@@ -367,6 +367,39 @@ SpringMVC框架是以请求为驱动，围绕Servlet设计，将请求发给控�
 
 
 
+### Spring实现扫描自定义注解
+
+1. BeanPostProcessor接口
+
+   这个接口中有两个方法：postProcessBeforeInitialization和postProcessAfterInitialization。当spring创建对象的前后分别会调用这两个方法，而我们就可以在对象创建之后，对这个对象进行方法级别的判断，找出那些有我的注解的对象以及方法。
+
+   ~~~java
+   public class MyListenerProcessor implements BeanPostProcessor {
+   	@Override
+   	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+   		return bean;
+   	}
+   
+   	@Override
+   	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+   		Method[] methods = ReflectionUtils.getAllDeclaredMethods(bean.getClass());
+   		if (methods != null) {
+   			for (Method method : methods) {
+   				MyListener myListener = AnnotationUtils.findAnnotation(method, MyListener.class);
+   				// process
+   			}
+   		}
+   		return bean;
+   	}
+   }
+   ~~~
+
+   
+
+2. SmartInitializingSingleton接口
+
+   当所有的singleton的bean都初始化完了之后才会回调这个接口。
+
 ### Spring 用到的设计模式
 
 
