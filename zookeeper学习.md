@@ -296,3 +296,7 @@ https://www.cnblogs.com/liuqijia/p/11456106.html
 ### 分布式id的实现
 
 ​	可以通过通过节点版本号实现；
+
+
+
+### 
