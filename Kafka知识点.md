@@ -21,6 +21,8 @@
 
 - Partition：Partition是物理上的概念，每个Topic包含一个或多个Partition。
 
+- Segment：Partition物理上由多个segment组成。
+
 - Producer：负责发布消息到Kafka broker。
 
 - Consumer：消息消费者，向Kafka broker读取消息的客户端。
@@ -94,7 +96,7 @@ bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 -
 | log.retention.minutes=300或log.retention.hours=24            | 数据文件保留多长时间， 存储的最大时间超过这个时间会根据log.cleanup.policy设置数据清除策略<br/>log.retention.bytes和log.retention.minutes或log.retention.hours任意一个达到要求，都会执行删除<br/>有2删除数据文件方式：<br/>      按照文件大小删除：log.retention.bytes<br/>  按照2中不同时间粒度删除：分别为分钟，小时 |
 | log.retention.bytes=-1                                       | topic每个分区的最大文件大小，一个topic的大小限制 = 分区数*log.retention.bytes。-1没有大小限log.retention.bytes和log.retention.minutes任意一个达到要求，都会执行删除，会被topic创建时的指定参数覆盖 |
 | log.retention.check.interval.ms=5minutes                     | 文件大小检查的周期时间，是否处罚 log.cleanup.policy中设置的策略 |
-| log.cleaner.enable=**false**                                 | 是否开启日志清理                                             |
+| log.cleaner.enable=false                                     | 是否开启日志清理                                             |
 | log.cleaner.threads = 2                                      | 日志清理运行的线程数                                         |
 | log.cleaner.io.max.bytes.per.second=None                     | 日志清理时候处理的最大大小                                   |
 | log.cleaner.dedupe.buffer.size=500*1024*1024                 | 日志清理去重时候的缓存空间，在空间允许的情况下，越大越好     |
@@ -324,6 +326,31 @@ https://blog.csdn.net/corleone_4ever/article/details/105370569
   |                          |                                                              |
   |                          |                                                              |
 
-  
-
 - 
+
+### Kafka文件存储机制
+
+- topic中partition存储分布
+
+  log.dirs=/data/kafka-logs；存储路径；创建2个topic名称分别为report_push、launch_info, partitions数量都为partitions=4。
+
+  ~~~
+                |--report_push-0
+                |--report_push-1
+                |--report_push-2
+                |--report_push-3
+                |--launch_info-0
+                |--launch_info-1
+                |--launch_info-2
+                |--launch_info-3
+  ~~~
+
+  在Kafka文件存储中，同一个topic下有多个不同partition，每个partition为一个目录，partiton命名规则为topic名称+有序序号，第一个partiton序号从0开始，序号最大值为partitions数量减1。 如果是多broker分布情况，请参考kafka集群partition分布原理分析。
+
+- partition的文件存储方式
+
+  https://cloud.tencent.com/developer/article/1057763
+
+- partition中的segment文件存储结构
+
+- 在partition中如何通过offset查找message
