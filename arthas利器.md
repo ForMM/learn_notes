@@ -66,3 +66,8 @@ java -jar arthas-boot.jar -h
 #### profiler/火焰图
 
 [profiler](https://arthas.aliyun.com/doc/profiler.html)–使用[async-profiler](https://github.com/jvm-profiling-tools/async-profiler)对应用采样，生成火焰图
+
+#### arthas分析问题案例
+
+1. 利用arthas精准定位cpu负载过高问题
+2. arthas实践--jad/mc/redefine线上热更新

@@ -234,12 +234,135 @@ redis-cluster把所有的物理节点映射到[0-16383]slot 哈希槽上（不�
 （项目中通过这个实现限流）配置每秒的速率和每秒的容量值
 
 项目中的场景有：
-1.缓存数据
-2.分布式锁
-3.延时队列
-4.限流
 
-5.消息队列
+1. 缓存数据
+2. 分布式锁
+3. 延时队列
+4. 限流
+5. 消息队列
 
 ### redis安装步骤及详细属性配置
 
+1. 进入官网找到下载地址 [https://redis.io/download]，鼠标右击选择 **复制链接地址**
+
+   **进入到Xshell控制台，进入usr/，输入wget，命令如下:**
+
+   ~~~shell
+   cd usr/
+   wget https://download.redis.io/releases/redis-6.0.10.tar.gz
+   ~~~
+
+2. 解压
+
+   - **解压后在根目录上输入ls 列出所有目录会发现与下载redis之前多了一个redis-6.0.10.tar.gz文件和 redis-6.0.10的目录。**
+   - **一般都会将redis目录放置到 /usr/local/redis目录，所以这里输入下面命令将目前在/root目录下的redis-6.0.10文件夹更改目录，同时更改文件夹名称为redis。**
+
+   ~~~shell
+   tar -zvxf redis-6.0.10.tar.gz
+   mv /usr/redis-6.0.10 /usr/local/redis
+   cd local/
+   ~~~
+
+3. 编译
+
+   **cd到redis目录，输入命令make执行编译命令，接下来控制台会输出各种编译过程中输出的内容。**（注意，编译需要C语言编译器gcc的支持，如果没有，需要先安装gcc。可以使用rpm -q gcc查看gcc是否安装，如果编译出错，请使用make clean清除临时文件。之后，找到出错的原因，解决问题后再来重新安装。 ）
+
+   ~~~shell
+   cd redis/
+   make
+   ~~~
+
+   如果输入make命令出现上图所示问题时，可能是gcc需要升级或安装
+
+   ~~~
+   1、安装gcc套装：
+   yum install cpp
+   yum install binutils
+   yum install glibc
+   yum install glibc-kernheaders
+   yum install glibc-common
+   yum install glibc-devel
+   yum install gcc
+   yum install make
+   2、升级gcc
+   yum -y install centos-release-scl
+   yum -y install devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-binutils
+   scl enable devtoolset-9 bash
+   3、设置永久升级：
+   echo "source /opt/rh/devtoolset-9/enable" >>/etc/profile
+   4、重新make：
+   ~~~
+
+4. 安装
+
+   ~~~shell
+   make PREFIX=/usr/local/redis install
+   ~~~
+
+   这里多了一个关键字 PREFIX= 这个关键字的作用是编译的时候用于指定程序存放的路径。比如我们现在就是指定了redis必须存放在/usr/local/redis目录。假设不添加该关键字Linux会将可执行文件存放在/usr/local/bin目录，库文件会存放在/usr/local/lib目录。配置文件会存放在/usr/local/etc目录。其他的资源文件会存放在usr/local/share目录。这里指定号目录也方便后续的卸载
+
+5. 启动
+
+   **根据上面的操作已经将redis安装完成了。在目录/usr/local/redis 输入下面命令启动redis**
+
+   ~~~shell
+   ./bin/redis-server ./redis.conf
+   ~~~
+
+6. redis.config配置文件
+
+   在目录/usr/local/redis下有一个redis.conf的配置文件。我们上面启动方式就是执行了该配置文件的配置运行的。我么可以通过cat、vim、less等Linux内置的读取命令读取该文件。
+
+   也可以通过redis-cli命令进入redis控制台后通过CONFIG GET * 的方式读取所有配置项。 如下：
+
+   ~~~shell
+   redis-cli
+   ~~~
+
+   如出现 bash: redis-cli: 未找到命令
+   **解决方法：**
+
+   ~~~shell
+   make install
+   
+   CONFIG GET *
+   ~~~
+
+   **修改配置文件：**这里我要将daemonize改为yes，同时也将#bind 127.0.0.1注释，将protected-mode设置为no。
+   这样启动后我就可以在外网访问了
+
+   ~~~
+   vim /usr/local/redis/redis.conf
+   ~~~
+
+   使用命令 /requirepass 快速查找到 # requirepass foobared 然后去掉注释，这个foobared改为自己的密码。也可以不加密码
+
+   **开机启动配置**
+
+   ~~~
+   echo "/usr/local/bin/redis-server /etc/redis/redis.conf &" >> /etc/rc.local
+   ~~~
+
+   **查看Redis是否正在运行，命令如下：**
+
+   ~~~
+   ps -aux | grep redis
+   ~~~
+
+   
+
+   详细属性配置
+
+   | 配置项                      | 说明                                                         |
+   | --------------------------- | ------------------------------------------------------------ |
+   | daemonize  no               | 默认情况下，redis 不是在后台运行的，如果需要在后台运行，把该项的值更改为yes。 |
+   | pidfile  /var/run/redis.pid | 当Redis 在后台运行的时候，Redis 默认会把pid 文件放在/var/run/redis.pid，你可以配置到其他地址。当运行多个redis 服务时，需要指定不同的pid 文件和端口 |
+   | port                        | 监听端口，默认为6379                                         |
+   | bind 127.0.0.1              | 指定Redis 只接收来自于该IP 地址的请求，如果不进行设置，那么将处理所有请求，在生产环境中为了安全最好设置该项。默认注释掉，不开启 |
+   | timeout 0                   | 设置客户端连接时的超时时间，单位为秒。当客户端在这段时间内没有发出任何指令，那么关闭该连接 |
+   | tcp-keepalive 0             | 指定TCP连接是否为长连接,"侦探"信号有server端维护。默认为0.表示禁用 |
+   | loglevel notice             | log 等级分为4 级，debug,verbose, notice, 和warning。生产环境下一般开启notice |
+   | logfile stdout              | 配置log 文件地址，默认使用标准输出，即打印在命令行终端的窗口上，修改为日志文件目录 |
+   | databases 16                | 设置数据库的个数，可以使用SELECT 命令来切换数据库。默认使用的数据库是0号库。默认16个库 |
+
+   
