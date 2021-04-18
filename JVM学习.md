@@ -171,7 +171,157 @@ https://www.jianshu.com/p/76959115d486
    -Joption：传递参数到vm,例如:-J-Xms512m
    ~~~
 
-2. 
+2. jstack
+
+   打印指定Java进程的线程堆栈信息。
+
+   ~~~shell
+   jstack -l 2264
+   ~~~
+
+   想要通过jstack命令来分析线程的情况的话，首先要知道线程都有哪些状态，下面这些状态是我们使用jstack命令查看线程堆栈信息时可能会看到的线程的几种状态：
+
+   ~~~
+   NEW：未启动的。不会出现在Dump中。
+   RUNNABLE：在虚拟机内执行的。运行中状态，可能里面还能看到locked字样，表明它获得了某把锁。
+   BLOCKED：受阻塞并等待监视器锁。被某个锁(synchronizers)給block住了。
+   WATING：无限期等待另一个线程执行特定操作。等待某个condition或monitor发生，一般停留在park(), wait(), sleep(),join() 等语句里。
+   TIMED_WATING：有时限的等待另一个线程的特定操作。和WAITING的区别是wait() 等语句加上了时间限制 wait(timeout)。
+   TERMINATED：已退出的。
+   ~~~
+
+   **Monitor**
+
+   Monitor是 Java中用以实现线程之间的互斥与协作的主要手段，它可以看成是对象或者 Class的锁。每一个对象都有，也仅有一个 monitor。下 面这个图，描述了线程和 Monitor之间关系，以 及线程的状态转换图：
+
+   <img src="./img/thread-1.jpg" alt="thread-1" style="zoom:50%;" />
+
+   进入区(Entrt Set)：表示线程通过synchronized要求获取对象的锁。如果对象未被锁住,则进入拥有者;否则则在进入区等待。一旦对象锁被其他线程释放,立即参与竞争。
+
+   拥有者(The Owner)：表示某一线程成功竞争到对象锁。
+
+   等待区(Wait Set) ：表示线程通过对象的wait方法,释放对象的锁,并在等待区等待被唤醒。
+
+   **调用修饰**
+
+   线程Dump分析的重要信息。修饰上方的方法调用。
+
+   ~~~
+   locked <地址> 目标：使用synchronized申请对象锁成功,监视器的拥有者。
+   waiting to lock <地址> 目标：使用synchronized申请对象锁未成功,在迚入区等待。
+   waiting on <地址> 目标：使用synchronized申请对象锁成功后,释放锁幵在等待区等待。
+   parking to wait for <地址> 目标 ：需与堆栈中的"parking to wait for (atjava.util.concurrent.SynchronousQueue$TransferStack)"结合来看。first–>此线程是在等待某个条件的发生，来把自己唤醒，second–>SynchronousQueue不是一个队列，其是线程之间移交信息的机制，当我们把一个元素放入到 SynchronousQueue 中时必须有另一个线程正在等待接受移交的任务，因此这就是本线程在等待的条件。
+   ~~~
+
+   **线程动作**
+
+   ~~~
+   runnable：状态一般为RUNNABLE。
+   in Object.wait()：等待区等待,状态为WAITING或TIMED_WAITING。
+   waiting for monitor entry：进入区等待,状态为BLOCKED。
+   waiting on condition：等待区等待、被park。
+   sleeping：休眠的线程,调用了Thread.sleep()。
+   ~~~
+
+   https://blog.csdn.net/cockroach02/article/details/82701458?utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control&dist_request_id=1331979.14894.16186680655580171&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control
+
+3. jmap
+
+   命令jmap是一个多功能的命令。它可以生成 java 程序的 dump 文件， 也可以查看堆内对象实例的统计信息、查看 ClassLoader 的信息以及 finalizer 队列。
+
+   ~~~shell
+   jmap -heap pid
+   ~~~
+
+   打印一个堆的摘要信息，包括使用的GC算法、堆配置信息和各内存区域内存使用信息
+
+   ~~~shell
+   jmap -histo:live pid
+   ~~~
+
+   其中包括每个Java类、对象数量、内存大小(单位：字节)、完全限定的类名。打印的虚拟机内部的类名称将会带有一个’*’前缀。如果指定了live子选项，则只计算活动的对象。
+
+   ~~~shell
+   jmap -clstats pid
+   ~~~
+
+   打印类加载器信息.对于每个类加载器而言，它的名称、活跃度、地址、父类加载器、它所加载的类的数量和大小都会被打印。此外，包含的字符串数量和大小也会被打印。
+
+   ~~~shell
+   jmap -dump:format=b,file=heapdump.phrof pid
+   ~~~
+
+   生成堆转储快照dump文件。以hprof二进制格式转储Java堆到指定filename的文件中。live子选项是可选的。如果指定了live子选项，堆中只有活动的对象会被转储。想要浏览heap dump，你可以使用jhat(Java堆分析工具)读取生成的文件。
+
+   注意：这个命令执行，JVM会将整个heap的信息dump写入到一个文件，heap如果比较大的话，就会导致这个过程比较耗时，并且执行的过程中为了保证dump的信息是可靠的，所以会暂停应用， 线上系统慎用。
+
+4. jstat
+
+   对Java应用程序的资源和性能进行实时的命令行的监控，包括了对Heap size和垃圾回收状况的监控。
+
+   ~~~shell
+   jstat –gc <pid>
+   ~~~
+
+   显示gc相关的堆信息，查看gc的次数，及时间。
+
+   S0C：年轻代中第一个survivor（幸存区）的容量 （字节）
+
+   S1C：年轻代中第二个survivor（幸存区）的容量 (字节)
+
+   S0U   ：年轻代中第一个survivor（幸存区）目前已使用空间 (字节)
+
+   S1U     ：年轻代中第二个survivor（幸存区）目前已使用空间 (字节)
+
+   EC      ：年轻代中Eden（伊甸园）的容量 (字节)
+
+   EU       ：年轻代中Eden（伊甸园）目前已使用空间 (字节)
+
+   OC        ：Old代的容量 (字节)
+
+   OU      ：Old代目前已使用空间 (字节)
+
+   MC：metaspace(元空间)的容量 (字节)
+
+   MU：metaspace(元空间)目前已使用空间 (字节)
+
+   YGC    ：从应用程序启动到采样时年轻代中gc次数
+
+   YGCT   ：从应用程序启动到采样时年轻代中gc所用时间(s)
+
+   FGC   ：从应用程序启动到采样时old代(全gc)gc次数
+
+   FGCT    ：从应用程序启动到采样时old代(全gc)gc所用时间(s)
+
+   GCT：从应用程序启动到采样时gc用的总时间(s)
+
+   ~~~shell
+   jstat -gcutil <pid>
+   ~~~
+
+   统计gc信息.
+
+   S0    ：年轻代中第一个survivor（幸存区）已使用的占当前容量百分比
+
+   S1    ：年轻代中第二个survivor（幸存区）已使用的占当前容量百分比
+
+   E     ：年轻代中Eden（伊甸园）已使用的占当前容量百分比
+
+   O     ：old代已使用的占当前容量百分比
+
+   P    ：perm代已使用的占当前容量百分比
+
+   YGC  ：从应用程序启动到采样时年轻代中gc次数
+
+   YGCT   ：从应用程序启动到采样时年轻代中gc所用时间(s)
+
+   FGC   ：从应用程序启动到采样时old代(全gc)gc次数
+
+   FGCT    ：从应用程序启动到采样时old代(全gc)gc所用时间(s)
+
+   GCT：从应用程序启动到采样时gc用的总时间(s)
+
+5. 
 
 ~~~shell
 top     #查系统消耗高的进程
@@ -314,9 +464,9 @@ PS Old Generation //老生代区域分配情况
    调优方式有：
 
    	1. 用 jps（JVM process Status）可以查看虚拟机启动的所有进程、执行主类的全名、JVM启动参数。
-    	2. 用jstat（JVM Statistics Monitoring Tool）监视虚拟机信息 。jstat -gc pid 500 10 ：每500毫秒打印一次Java堆状况（各个区的容量、使用容量、gc时间等信息），打印10次。
-    	3. 用jmap（Memory Map for Java）查看堆内存信息，执行jmap -histo pid可以打印出当前堆中所有每个类的实例数量和内存占用。执行 jmap -dump 可以转储堆内存快照到指定文件，比如执行 jmap -dump:format=b,file=/data/jvm/dumpfile_jmap.hprof 3361 可以把当前堆内存的快照转储到dumpfile_jmap.hprof文件中，然后可以对内存快照进行分析。
-    	4. 利用jconsole、jvisualvm分析内存信息(各个区如Eden、Survivor、Old等内存变化情况)。内存快照的第三方工具，比如eclipse mat，它比jvisualvm功能更专业，出了查看每个类及对应实例占用的空间、数量，还可以查询对象之间的调用链，可以查看某个实例到GC Root之间的链。
+   	2. 用jstat（JVM Statistics Monitoring Tool）监视虚拟机信息 。jstat -gc pid 500 10 ：每500毫秒打印一次Java堆状况（各个区的容量、使用容量、gc时间等信息），打印10次。
+   	3. 用jmap（Memory Map for Java）查看堆内存信息，执行jmap -histo pid可以打印出当前堆中所有每个类的实例数量和内存占用。执行 jmap -dump 可以转储堆内存快照到指定文件，比如执行 jmap -dump:format=b,file=/data/jvm/dumpfile_jmap.hprof 3361 可以把当前堆内存的快照转储到dumpfile_jmap.hprof文件中，然后可以对内存快照进行分析。
+   	4. 利用jconsole、jvisualvm分析内存信息(各个区如Eden、Survivor、Old等内存变化情况)。内存快照的第三方工具，比如eclipse mat，它比jvisualvm功能更专业，出了查看每个类及对应实例占用的空间、数量，还可以查询对象之间的调用链，可以查看某个实例到GC Root之间的链。
 
    调优经验：
 
@@ -390,14 +540,73 @@ PS Old Generation //老生代区域分配情况
    3. 线程栈，是否线程暴涨，线程死锁
 
        	jstack 工具可以获取当前线程运行情况，目前为止笔者没有发现一个简单有效的命令方式去判断系统有没有死锁，一般都是使用jconsole连接后使用其检测死锁的工具和jstack dump出具体线程栈信息后，然后人为分析，这两次方式都不是很便捷。
-          如果时间和环境允许，最好是使用dump出来的文件的，然后使用MAT（Memory Analyse Tools）分析，MAT强大的分析功能和可视化界面是个不错的选择。
+       	如果时间和环境允许，最好是使用dump出来的文件的，然后使用MAT（Memory Analyse Tools）分析，MAT强大的分析功能和可视化界面是个不错的选择。
 
    4. 排查日志，检查程序代码
 
 #### jvm问题排查案例
 
 	1. 接入方不停上传文件，导致内存不断被占用，最会服务器崩掉。当时立即采用增加服务器，用nignx均衡到不同服务器维持业务不受影响。然后采用导出dump文件，分析代码
- 	2. 
+
+1. jstack找出最耗cpu的线程并定位代码
+
+   jstack可以定位到线程堆栈，根据堆栈信息我们可以定位到具体代码。
+
+   1. 第一步先找出Java进程ID，服务器上的Java应用名称为mrf-center。
+
+      ~~~shell
+      ps -ef | grep mrf-center
+      ~~~
+
+   2. 第二步该进程内最耗cpu的现程
+
+      ~~~shell
+      top -Hp pid
+      ~~~
+
+      TIME列就是各个Java线程耗费的CPU时间，CPU时间最长的是线程ID为21742的线程，用
+
+      ```
+      printf "%x\n" 21742
+      ```
+
+      得到21742的十六进制值为54ee，下面会用到。
+
+      jstack输出进程21711的堆栈信息.
+
+      ```shell
+      jstack 21711 | grep 54ee
+      ```
+
+      ```
+      "PollIntervalRetrySchedulerThread" prio=10 tid=0x00007f950043e000 nid=0x54ee in Object.wait()
+      ```
+
+      可以看到CPU消耗在PollIntervalRetrySchedulerThread这个类的Object.wait()，我找了下我的代码，定位到下面的代码：
+
+      ```
+      // Idle wait
+      getLog().info("Thread [" + getName() + "] is idle waiting...");
+      schedulerThreadState = PollTaskSchedulerThreadState.IdleWaiting;
+      long now = System.currentTimeMillis();
+      long waitTime = now + getIdleWaitTime();
+      long timeUntilContinue = waitTime - now;
+      synchronized(sigLock) {
+        try {
+          if(!halted.get()) {
+            sigLock.wait(timeUntilContinue);
+          }
+        } 
+        catch (InterruptedException ignore) {
+        }
+      }
+      ```
+
+      它是轮询任务的空闲等待代码，上面的sigLock.wait(timeUntilContinue)就对应了前面的Object.wait()。
+
+2. 
+
+
 
 #### MAT分析工具
 
@@ -488,5 +697,212 @@ Eclipse Memory Analyzer是一个快速且功能丰富的Java堆分析器，可�
 
       通过图型列出最大的Object
 
-   
+#### Jvm源码分析之attach机制
+
+1. attach是什么？
+
+   **jvm提供一种jvm进程间通信的能力，能让一个进程传命令给另外一个进程，并让它执行内部的一些操作**，比如说我们为了让另外一个jvm进程把线程dump出来，那么我们跑了一个jstack的进程，然后传了个pid的参数，告诉它要哪个进程进行线程dump，既然是两个进程，那肯定涉及到进程间通信，以及传输协议的定义，比如要执行什么操作，传了什么参数等
+
+2. attach能做什么？
+
+   通过attach机制，我们可以直接attach到目标JVM进程，然后进行一些操作，比如获取内存dump、线程dump，类信息统计(比如已加载的类以及实例个数等)，动态加载agent，动态设置vm flag(但是并不是所有的flag都可以设置的，因为有些flag是在jvm启动过程中使用的，是一次性的)，打印vm flag，获取系统属性等。
+
+3. Attach实现原理
+
+   通过jstack查看线程dump的同学可能会留意到下面这个两个线程：
+
+   ~~~shell
+   "Attach Listener" #10 daemon prio=9 os_prio=31 tid=0x00007fef2283a000 nid=0x4b03 runnable [0x0000000000000000]
+      java.lang.Thread.State: RUNNABLE
+   "Signal Dispatcher" #4 daemon prio=9 os_prio=31 tid=0x00007fef22030000 nid=0x3907 waiting on condition [0x0000000000000000]
+      java.lang.Thread.State: RUNNABLE
+   ~~~
+
+   这两个线程都是JVM线程。其中每个JVM都会有`Signal Dispatcher`线程，用于处理信号。`Attach Listener`线程用于JVM进程间的通信，但是它不一定会启动，启动它有两种方式。
+
+   - Attach Listener线程的启动
+
+     - 启动的时候通过jvm参数指定启动该线程
+
+       | VM参数                 | 默认值 |
+       | ---------------------- | ------ |
+       | DisableAttachMechanism | false  |
+       | StartAttachListener    | false  |
+       | ReduceSignalUsage      | false  |
+
+       JVM启动Attach Listener线程的代码如下 
+
+       ~~~java
+       if (!DisableAttachMechanism) {
+           if (StartAttachListener || AttachListener::init_at_startup()) {
+             AttachListener::init();
+           }
+       }
+       bool AttachListener::init_at_startup() {
+         if (ReduceSignalUsage) {
+           return true;
+         } else {
+           return false;
+         }
+       }
+       ~~~
+
+       `java -XX:+StartAttachListener mainClass`即可。
+
+     - attach目标JVM成功后，目标JVM启动该线程
+
+       如果不在启动jvm的时候启动Attach Listener线程，那只能依靠`Signal Dispatcher`线程来启动了。我们可以看一下VirtualMachine.attach(pid)的实现：
+
+       ~~~java
+       public static VirtualMachine attach(String pid) throws AttachNotSupportedException, IOException {
+               if (pid == null) {
+                   throw new NullPointerException("id cannot be null");
+               } else {
+                   List providerList = AttachProvider.providers();
+                   if (providerList.size() == 0) {
+                       throw new AttachNotSupportedException("no providers installed");
+                   } else {
+                       AttachNotSupportedException ex = null;
+                       Iterator iterator = var1.iterator();
+       
+                       while(iterator.hasNext()) {
+                           AttachProvider provider = (AttachProvider)iterator.next();
+       
+                           try {
+                               return provider.attachVirtualMachine(pid);
+                           } catch (AttachNotSupportedException ex2) {
+                               ex = ex2;
+                           }
+                       }
+       
+                       throw ex;
+                   }
+               }
+           }
+       ~~~
+
+       上面的代码回去获取所有的AttachProvider，这里包含了各个系统的AttachProvider实现。之后遍历这个providerList，直到匹配上。如果是在linux下，最终会调用LinuxAttachProvider，然后返回一个LinuxVirtualMachine实例。我们看一下LinuxVirtualMachine的构造方法：
+
+       ~~~java
+       LinuxVirtualMachine(AttachProvider provider, String vmid)
+               throws AttachNotSupportedException, IOException
+           {
+               super(provider, vmid);
+       
+               int pid;
+               try {
+                   pid = Integer.parseInt(vmid);
+               } catch (NumberFormatException x) {
+                   throw new AttachNotSupportedException("Invalid process identifier");
+               }
+       
+       		//尝试获取socketFile，如果没获取到，就准备往目标JVM发送信号
+               path = findSocketFile(pid);
+               if (path == null) {
+               	//创建attach文件 /proc/<pid>/cwd/.attach_pid<pid> 
+                   File f = createAttachFile(pid);
+                   try {
+       				//如果是linux，由于linux线程的实现是轻进程，因此需要往它的所有子进程发送信号
+       				//如果不是linux，直接往目标进程发送sigquit信号即可
+                       if (isLinuxThreads) {
+                           int mpid;
+                           try {
+                               mpid = getLinuxThreadsManager(pid);
+                           } catch (IOException x) {
+                               throw new AttachNotSupportedException(x.getMessage());
+                           }
+                           assert(mpid >= 1);
+                           sendQuitToChildrenOf(mpid);
+                       } else {
+                           sendQuitTo(pid);
+                       }
+       
+                       int i = 0;
+                       long delay = 200;
+                       int retries = (int)(AttachTimeout() / delay);
+                       do {
+                           try {
+                               Thread.sleep(delay);
+                           } catch (InterruptedException x) { }
+                           //开始轮询等待目标JVM建立socketFile
+                           path = findSocketFile(pid);
+                           i++;
+                       } while (i <= retries && path == null);
+                       if (path == null) {
+                           throw new AttachNotSupportedException(
+                               "Unable to open socket file: target process not responding " +
+                               "or HotSpot VM not loaded");
+                       }
+                   } finally {
+                       f.delete();
+                   }
+               }
+       
+               //这里需要检查目标JVM创建的socketFile我们是否有权限访问
+               checkPermissions(path);
+       
+               //检查我们是否有权限连接到目标进程
+               int s = socket();
+               try {
+                   connect(s, path);
+               } finally {
+                   close(s);
+               }
+           }
+       ~~~
+
+       在这个方法里面，会先判断对应目录下有没有socketFile，如果没有，则往目标进程发送sigquit信号。目标JVM进程收到sigquit信号后，主要由Signal Dispatcher线程处理。Signal Dispatcher线程判断出信号是sigquit时，就会启动Attach Listener线程。
+
+   - Attach Listener线程工作原理
+
+     Attach Listener线程启动后，就会创建一个监听套接字，并创建了一个文件/tmp/.java_pid，这个就是LinuxVirtualMachine构造函数中一直尝试获取的socketFile。随着这个socketFile创建，也就意味着客户端那边的attach成功了。
+
+     之后客户端和目标JVM进程就通过这个socketFile进行通信。客户端可以通过这个socketFile发送相关命令。Attach Listener线程做的事情就是监听这个socketFile，发现有请求就解析，然后根据命令执行不同的方法，最后将结果返回。
+
+#### JVM运行过程中重要的线程
+
+| 线程名称                                     | 所属   | 解释说明                                                     |
+| -------------------------------------------- | ------ | ------------------------------------------------------------ |
+| Attach Listener                              | JVM    | Attach Listener 线程是负责接收到外部的命令，而对该命令进行执行的并且把结果返回给发送者。通常我们会用一些命令去要求jvm给我们一些反馈信息，如：java -version、jmap、jstack等等。 如果该线程在jvm启动的时候没有初始化，那么，则会在用户第一次执行jvm命令时，得到启动。 |
+| Signal Dispatcher                            | JVM    | 前面我们提到第一个Attach Listener线程的职责是接收外部jvm命令，当命令接收成功后，会交给signal dispather 线程去进行分发到各个不同的模块处理命令，并且返回处理结果。 signal dispather线程也是在第一次接收外部jvm命令时，进行初始化工作。 |
+| CompilerThread0                              | JVM    | 用来调用JITing，实时编译装卸class 。 通常，jvm会启动多个线程来处理这部分工作，线程名称后面的数字也会累加，例如：CompilerThread1 |
+| Concurrent Mark-Sweep GC Thread              | JVM    | 并发标记清除垃圾回收器（就是通常所说的CMS GC）线程， 该线程主要针对于老年代垃圾回收。ps：启用该垃圾回收器，需要在jvm启动参数中加上： -XX:+UseConcMarkSweepGC |
+| DestroyJavaVM                                | JVM    | 执行main()的线程在main执行完后调用JNI中的 jni_DestroyJavaVM() 方法唤起DestroyJavaVM 线程。  JVM在 Jboss 服务器启动之后，就会唤起DestroyJavaVM线程，处于等待状态，等待其它线程（java线程和native线程）退出时通知它卸载JVM。线程退出时，都会判断自己当前是否是整个JVM中最后一个非deamon线程，如果是，则通知DestroyJavaVM 线程卸载JVM。<br/>ps：<br/>扩展一下：<br/>1.如果线程退出时判断自己不为最后一个非deamon线程，那么调用thread->exit(false) ，并在其中抛出thread_end事件，jvm不退出。<br/>2.如果线程退出时判断自己为最后一个非deamon线程，那么调用before_exit() 方法，抛出两个事件： 事件1：thread_end 线程结束事件；<br/>事件2：VM的death事件。<br/>然后调用thread->exit(true) 方法，接下来把线程从active list卸下，删除线程等等一系列工作执行完成后，则通知正在等待的DestroyJavaVM 线程执行卸载JVM操作。 |
+| ContainerBackgroundProcessor 线程            | JBOSS  | 它是一个守护线程, 在jboss服务器在启动的时候就初始化了,主要工作是定期去检查有没有Session过期.过期则清除.http://liudeh-009.iteye.com/blog/1584876 |
+| Dispatcher-Thread-3 线程                     | Log4j  | Log4j具有异步打印日志的功能，需要异步打印日志的Appender都需要注册到 AsyncAppender对象里面去，由AsyncAppender进行监听，决定何时触发日志打印操作。 AsyncAppender如果监听到它管辖范围内的Appender有打印日志的操作，则给这个Appender生成一个相应的event，并将该event保存在一个buffuer区域内。 <br/>Dispatcher-Thread-3线程负责判断这个event缓存区是否已经满了，如果已经满了，则将缓存区内的所有event分发到Appender容器里面去，那些注册上来的Appender收到自己的event后，则开始处理自己的日志打印工作。 Dispatcher-Thread-3线程是一个守护线程。 |
+| Finalizer线程                                | JVM    | 这个线程也是在main线程之后创建的，其优先级为10，主要用于在垃圾收集前，调用对象的finalize()方法；关于Finalizer线程的几点：<br/>1) 只有当开始一轮垃圾收集时，才会开始调用finalize()方法；因此并不是所有对象的finalize()方法都会被执行；<br/>2) 该线程也是daemon线程，因此如果虚拟机中没有其他非daemon线程，不管该线程有没有执行完finalize()方法，JVM也会退出；<br/>3) JVM在垃圾收集时会将失去引用的对象包装成Finalizer对象（Reference的实现），并放入ReferenceQueue，由Finalizer线程来处理；最后将该Finalizer对象的引用置为null，由垃圾收集器来回收；<br/>4) JVM为什么要单独用一个线程来执行finalize()方法呢？如果JVM的垃圾收集线程自己来做，很有可能由于在finalize()方法中误操作导致GC线程停止或不可控，这对GC线程来说是一种灾难； |
+| Gang worker#0                                | JVM    | JVM 用于做新生代垃圾回收（monir gc）的一个线程。#号后面是线程编号，例如：Gang worker#1 |
+| GC Daemon                                    | JVM    | GC Daemon 线程是JVM为RMI提供远程分布式GC使用的，GC Daemon线程里面会主动调用System.gc()方法，对服务器进行Full GC。 其初衷是当 RMI 服务器返回一个对象到其客户机（远程方法的调用方）时，其跟踪远程对象在客户机中的使用。当再没有更多的对客户机上远程对象的引用时，或者如果引用的“租借”过期并且没有更新，服务器将垃圾回收远程对象。<br/>不过，我们现在jvm启动参数都加上了-XX:+DisableExplicitGC配置，所以，这个线程只有打酱油的份了。 |
+| IdleRemover                                  | JBOSS  | Jboss连接池有一个最小值， 该线程每过一段时间都会被Jboss唤起，用于检查和销毁连接池中空闲和无效的连接，直到剩余的连接数小于等于它的最小值。 |
+| Java2D Disposer                              | JVM    | 这个线程主要服务于awt的各个组件。 说起该线程的主要工作职责前，需要先介绍一下Disposer类是干嘛的。 Disposer提供一个addRecord方法。 如果你想在一个对象被销毁前再做一些善后工作，那么，你可以调用Disposer#addRecord方法，将这个对象和一个自定义的DisposerRecord接口实现类，一起传入进去，进行注册。  Disposer类会唤起“Java2D Disposer”线程，该线程会扫描已注册的这些对象是否要被回收了，如果是，则调用该对象对应的DisposerRecord实现类里面的dispose方法。<br/>Disposer实际上不限于在awt应用场景，只是awt里面的很多组件需要访问很多操作系统资源，所以，这些组件在被回收时，需要先释放这些资源。 |
+| InsttoolCacheScheduler_QuartzSchedulerThread | Quartz | InsttoolCacheScheduler_QuartzSchedulerThread是Quartz的主线程，它主要负责实时的获取下一个时间点要触发的触发器，然后执行触发器相关联的作业 。 <br/>原理大致如下：<br/>   Spring和Quartz结合使用的场景下，Spring IOC容器初始化时会创建并初始化Quartz线程池（TreadPool），并启动它。刚启动时线程池中每个线程都处于等待状态，等待外界给他分配Runnable（持有作业对象的线程）。<br/>   继而接着初始化并启动Quartz的主线程<br/>（InsttoolCacheScheduler_QuartzSchedulerThread），该线程自启动后就会处于等待状态。等待外界给出工作信号之后，该主线程的run方法才实质上开始工作。run中会获取JobStore中下一次要触发的作业，拿到之后会一直等待到该作业的真正触发时间，然后将该作业包装成一个JobRunShell对象（该对象实现了Runnable接口，其实看是上面TreadPool中等待外界分配给他的Runnable），然后将刚创建的JobRunShell交给线程池，由线程池负责执行作业。<br/>线程池收到Runnable后，从线程池一个线程启动Runnable，反射调用JobRunShell中的run方法，run方法执行完成之后， TreadPool将该线程回收至空闲线程中。 |
+| JBossLifeThread                              | Jboss  | Jboss主线程启动成功，应用程序部署完毕之后将JBossLifeThread线程实例化并且start，JBossLifeThread线程启动成功之后就处于等待状态，以保持Jboss Java进程处于存活中。  所得比较通俗一点，就是Jboss启动流程执行完毕之后，为什么没有结束？ 就是因为有这个线程hold主了它。 |
+| JBoss System Threads(1)-1                    | Jboss  | 该线程是一个socket服务，默认端口号为： 1099。主要用于接收外部naming service（Jboss JNDI）请求。 |
+| JCA PoolFiller                               | Jboss  | 该线程主要为JBoss内部提供连接池的托管。 <br/>简单介绍一下工作原理 ：Jboss内部凡是有远程连接需求的类，都需要实现ManagedConnectionFactory接口，例如需要做JDBC连接的XAManagedConnectionFactory对象，就实现了该接口。然后将XAManagedConnectionFactory对象，还有其它信息一起包装InternalManagedConnectionPool对象里面，接着将InternalManagedConnectionPool交给PoolFiller对象里面的列队进行管理。  <br/>JCA PoolFiller线程会定期判断列队内是否有需要创建和管理的InternalManagedConnectionPool<br/>对象，如果有的话，则调用该对象的fillToMin方法， 触发它去创建相应的远程连接，并且将这个连接维护到它相应的连接池里面去。 |
+| JDWP Event Helper Thread                     | JVM    | JDWP是通讯交互协议，它定义了调试器和被调试程序之间传递信息的格式。它详细完整地定义了请求命令、回应数据和错误代码，保证了前端和后端的JVMTI和JDI的通信通畅。  该线程主要负责将JDI事件映射成JVMTI信号，以达到调试过程中操作JVM的目的。 |
+| JDWP Transport Listener:dt_socket            | JVM    | 该线程是一个Java Debugger的监听器线程，负责受理客户端的debug请求。 通常我们习惯将它的监听端口设置为8787。 |
+| Low Memory Detector                          | JVM    | 这个线程是负责对可使用内存进行检测，如果发现可用内存低，分配新的内存空间。 |
+| process reaper                               | JVM    | 该线程负责去执行一个 OS 命令行的操作。                       |
+| Reference Handler                            | JVM    | JVM在创建main线程后就创建Reference Handler线程，其优先级最高，为10，它主要用于处理引用对象本身（软引用、弱引用、虚引用）的垃圾回收问题 。 |
+| Surrogate Locker Thread (CMS)                | JVM    | 这个线程主要用于配合CMS垃圾回收器使用，它是一个守护线程，其主要负责处理GC过程中，Java层的Reference（指软引用、弱引用等等）与jvm 内部层面的对象状态同步。 这里对它们的实现稍微做一下介绍：这里拿 WeakHashMap做例子，将一些关键点先列出来（我们后面会将这些关键点全部串起来）：<br/>1.我们知道HashMap用Entry[]数组来存储数据的，WeakHashMap也不例外, 内部有一个Entry[]数组。<br/>2. WeakHashMap的Entry比较特殊，它的继承体系结构为<br/>Entry->WeakReference->Reference 。<br/>3.Reference 里面有一个全局锁对象：Lock，<br/>它也被称为pending_lock.注意：它是静态对象。<br/>4. Reference  里面有一个静态变量：pending。<br/>5. Reference里面有一个静态内部类：ReferenceHandler的线程，它在static块里面被初始化并且启动，启动完成后处于wait状态，它在一个Lock同步锁模块中等待。<br/>6.另外，WeakHashMap里面还实例化了一个ReferenceQueue列队，这个列队的作用，后面会提到。<br/>7.上面关键点就介绍完毕了，下面我们把他们串起来。<br/>假设，WeakHashMap对象里面已经保存了很多对象的引用。<br/>JVM 在进行CMS GC的时候，会创建一个ConcurrentMarkSweepThread（简称CMST）线程去进行GC，ConcurrentMarkSweepThread线程被创建的同时会创建一个SurrogateLockerThread（简称SLT）线程并且启动它，SLT启动之后，处于等待阶段。CMST开始GC时，会发一个消息给SLT让它去获取Java层Reference对象的全局锁：Lock。 直到CMS GC完毕之后，JVM 会将WeakHashMap中所有被回收的对象所属的WeakReference容器对象放入到Reference 的pending属性当中（每次GC完毕之后，pending属性基本上都不会为null了），然后通知SLT释放并且notify全局锁:Lock。此时激活了ReferenceHandler线程的run方法，使其脱离wait状态，开始工作了。ReferenceHandler这个线程会将pending中的所有WeakReference对象都移动到它们各自的列队当中，比如当前这个WeakReference属于某个WeakHashMap对象，那么它就会被放入相应的ReferenceQueue列队里面（该列队是链表结构）。 当我们下次从WeakHashMap对象里面get、put数据或者调用size方法的时候，WeakHashMap就会将ReferenceQueue列队中的WeakReference依依poll出来去和Entry[]数据做比较，如果发现相同的，则说明这个Entry所保存的对象已经被GC掉了，那么将Entry[]内的Entry对象剔除掉。 |
+| taskObjectTimerFactory                       | JVM    | 顾名思义，该线程就是用来执行任务的。 当我们把一个认为交给Timer对象，并且告诉它执行时间，周期时间后，Timer就会将该任务放入任务列队，并且通知taskObjectTimerFactory线程去处理任务，taskObjectTimerFactory线程会将状态为取消的任务从任务列队中移除，如果任务是非重复执行类型的，则在执行完该任务后，将它从任务列队中移除，如果该任务是需要重复执行的，则计算出它下一次执行的时间点。 |
+| VM Periodic Task Thread                      | JVM    | 该线程是JVM周期性任务调度的线程，它由WatcherThread创建，是一个单例对象。 该线程在JVM内使用得比较频繁，比如：定期的内存监控、JVM运行状况监控，还有我们经常需要去执行一些jstat 这类命令查看gc的情况，如下：<br/><br/>jstat -gcutil 23483 250 7   这个命令告诉jvm在控制台打印PID为：23483的gc情况，间隔250毫秒打印一次，一共打印7次 |
+| VM Thread                                    | JVM    | 这个线程就比较牛b了，是jvm里面的线程母体，根据hotspot源码（vmThread.hpp）里面的注释，它是一个单例的对象（最原始的线程）会产生或触发所有其他的线程，这个单个的VM线程是会被其他线程所使用来做一些VM操作（如，清扫垃圾等）。<br/>在 VMThread 的结构体里有一个VMOperationQueue列队，所有的VM线程操作(vm_operation)都会被保存到这个列队当中，VMThread 本身就是一个线程，它的线程负责执行一个自轮询的loop函数(具体可以参考：<br/>VMThread.cpp里面的<br/>void VMThread::loop()) ，该loop函数从VMOperationQueue列队中按照优先级取出当前需要执行的操作对象(VM_Operation)，<br/>并且调用VM_Operation->evaluate函数去执行该操作类型本身的业务逻辑。<br/>ps：VM操作类型被定义在<br/>vm_operations.hpp文件内，列举几个：ThreadStop、<br/>ThreadDump、<br/>PrintThreads、<br/>GenCollectFull、GenCollectFullConcurrent、CMS_Initial_Mark、CMS_Final_Remark….. |
+|                                              |        |                                                              |
+
+https://blog.csdn.net/rachel_luo/article/details/8920596
+
+#### jvm操作中遇到的问题
+
+1. Unable to open socket file: target process not responding or HotSpot VM not loaded
+
+   在用jstack工具查看jvm线程的运行情况时出现上述错误。就是因为该进程长时间没有启停，在/tmp/hsperfdata_'username'/文件夹下的该进程文件被Linux自身的机制（tmp下面不能存放很多文件）删除，需重新启停。所以要注意/etc/cron.daily/tmpwatch改文件在生产的情况。否则出现内存泄漏，或者内存溢出时，很难排查，或者出现系统运行缓慢时，想要观察系统运行情况也没办法，再或者，想把现场保存至dump文件中，等待大神解决也不能做。
+
+2.  Can't attach symbolicator to the process
+
+   升级jdk版本到11
+
+3. 
+
+
 
