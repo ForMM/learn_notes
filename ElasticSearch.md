@@ -90,11 +90,14 @@
 
 ​	下载地址：https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.11.1-linux-x86_64.tar.gz
 
+7版本需要jdk11，现在用的比较多的是jdk8，所以改成了6的版本
+
 ~~~shell
 #下载到当前目录
 curl -L -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.11.1-linux-x86_64.tar.gz
+ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.8.16.tar.gz
 #解压到当前目录
-tar -zxvf elasticsearch-7.11.1-linux-x86_64.tar.gz
+tar -zxvf elasticsearch-6.8.16.tar.gz
 #运行es
 ./elasticsearch-7.11.1/bin/elasticsearch
 

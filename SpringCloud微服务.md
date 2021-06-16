@@ -240,7 +240,24 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
 
 5. 
 
-### 注册中心(Eureka)
+### 注册中心(Eureka、Nacos)
+
+市面上比较流行的注册中心有ZooKeeper、Eureka、Consul 、Nacos。当我们技术选择时候，需要从多个维度分析为什么会选择这个技术栈。
+
+| **对比项目/注册中心** | **Nacos**                  | **Eureka**  | **Consul**        | **Zookeeper** |
+| --------------------- | -------------------------- | ----------- | ----------------- | ------------- |
+| 一致性协议            | CP+AP                      | AP          | CP                | CP            |
+| 健康检查              | TCP/HTTP/MYSQL/Client Beat | Client Beat | TCP/HTTP/gRPC/Cmd | Keep Alive    |
+| 负载均衡策略          | 权重/ metadata/Selector    | Ribbon      | Fabio             | —             |
+| 雪崩保护              | 有                         | 有          | 无                | 无            |
+| 自动注销实例          | 支持                       | 支持        | 支持              | 支持          |
+| 访问协议              | HTTP/DNS                   | HTTP        | HTTP/DNS          | TCP           |
+| 监听支持              | 支持                       | 支持        | 支持              | 支持          |
+| 多数据中心            | 支持                       | 支持        | 支持              | 不支持        |
+| 跨注册中心同步        | 支持                       | 不支持      | 支持              | 不支持        |
+| SpringCloud集成       | 支持                       | 支持        | 支持              | 支持          |
+| Dubbo集成             | 支持                       | 不支持      | 支持              | 支持          |
+| K8S集成               | 支持                       | 不支持      | 支持              | 不支持        |
 
 - 分布式系统的CAP理论
 
@@ -293,33 +310,252 @@ Feign通过处理注解，将请求模板化，当实际调用的时候，传入
   Eureka Server集群的节点之间是通过http的方式进行同步的，网络存在不可靠性，为了保持高可用性，eureka server 牺牲了数据一致性，eureka server不满足 CAP找那个C（数据一致性）。
   
   https://blog.csdn.net/qwe86314/article/details/94552801
+  
+  - **Consul强一致性(C)带来的是**：
+  
+    服务注册相比Eureka会稍慢一些。因为Consul的raft协议要求必须过半数的节点都写入成功才认为注册成功
+    Leader挂掉时，重新选举期间整个consul不可用。保证了强一致性但牺牲了可用性。
+  
+    **Eureka保证高可用(A)和最终一致性**：
+  
+    服务注册相对要快，因为不需要等注册信息replicate到其他节点，也不保证注册信息是否replicate成功
+    当数据出现不一致时，虽然A, B上的注册信息不完全相同，但每个Eureka节点依然能够正常对外提供服务，这会出现查询服务信息时如果请求A查不到，但请求B就能查到。如此保证了可用性但牺牲了一致性。
+  
+  1. nacos
+  
+     Nacos 支持基于 DNS 和基于 RPC 的服务发现。在Spring Cloud中使用Nacos，只需要先下载 Nacos 并启动 Nacos server，Nacos只需要简单的配置就可以完成服务的注册发现。
 
-### 配置中心(Apollo)
+### 配置中心(Apollo、Nacos)
 
-~~~
-优点：
-1. 统一管理不同环境、不同集群的配置
-2. 配置修改实时生效
-3. 版本发布管理
-4. 灰度发布
-5. 权限管理、发布审核、操作审计
-6. 客户端配置信息监控
-7. 部署简单
+市面上比较流行的配置中心有Spring Cloud Config、Apollo和Nacos。当我们技术选择时候，需要从多个维度分析为什么会选择这个技术栈。
 
-appolo怎么实现动态配置？
-	apollo的实时配置实现原理跟spring加载配置文件一样的，
+灰度发布、权限管理、版本管理&回滚、配置格式校验、监听查询、多环境的支持、集群部署等维度进行分析选型。
 
-~~~
+| **对比项目/配置中心**    | **spring cloud config**                       | **apollo**                           | **nacos**                  |
+| ------------------------ | --------------------------------------------- | ------------------------------------ | -------------------------- |
+| 开源时间                 | 2014.9                                        | 2016.5                               | 2018.6                     |
+| 配置实时推送             | 支持（Spring Cloud Bus）                      | 支持（HTTP长轮询1s内）               | 支持（HTTP长轮询1s内）     |
+| 版本管理                 | 支持（Git）                                   | 自动管理                             | 自动管理                   |
+| 配置回滚                 | 支持（Git）                                   | 支持                                 | 支持                       |
+| 灰度发布                 | 支持                                          | 支持                                 | 支持                       |
+| 权限管理                 | 支持                                          | 支持                                 | 待支持（弱鉴权体系）       |
+| 多集群多环境             | 支持                                          | 支持                                 | 支持                       |
+| 监听查询                 | 支持                                          | 支持                                 | 支持                       |
+| 多语言                   | 只支持Java                                    | Go,C++,Python,Java,.net,OpenAPI      | Python,Java,Nodejs,OpenAPI |
+| 分布式高可用最小集群数量 | Config-Server2+Git+MQ                         | Config2+Admin3+Portal*2+Mysql=8      | Nacos*3+MySql=4            |
+| 配置格式校验             | 不支持                                        | 支持                                 | 支持                       |
+| 通信协议                 | HTTP和AMQP                                    | HTTP                                 | HTTP                       |
+| 数据一致性               | Git保证数据一致性，Config-Server从Git读取数据 | 数据库模拟消息队列，Apollo定时读消息 | HTTP异步通知               |
+| 单机读（tps）            | 7（限流所制）                                 | 9000                                 | 15000                      |
+| 单机写（tps）            | 5（限流所制）                                 | 1100                                 | 1800                       |
+| 3节点读                  | 21（限流所制）                                | 27000                                | 45000                      |
+| 3节点写                  | 5（限流所制）                                 | 3300                                 | 5600                       |
 
-### 链路追踪(Zipkin)
+**总的来说**
 
-- 原理
+1. Apollo和Nacos相对于Spring Cloud Config的生态支持更广，在配置管理流程上做的更好。
+2. Apollo相对于Nacos在配置管理做的更加全面，不过使用起来也要麻烦一些。
+3. Apollo容器化较困难，Nacos有官网的镜像可以直接部署，总体来说，Nacos比apollo更符合KISS原则。
+4. Nacos部署和使用起来相对比较简洁，在对性能要求比较高的大规模场景更适合。
 
-  在服务调用的请求和响应中加入ID，标明上下游请求的关系。利用这些信息，可以可视化地分析服务调用链路和服务间的依赖关系。**Spring Cloud Sleuth是对Zipkin的一个封装**。对于Span、Trace等信息的生成、接入HTTP Request，以及向Zipkin Server发送采集信息等全部自动完成。
+此外，Nacos除了提供配置中心的功能，还提供了动态服务发现、服务共享与管理的功能，降低了服务化改造过程中的难度。
 
-- 架构
+以上，我们从产品功能、使用体验、实施过程和性能 4 个纬度对Spring Cloud Config、Apollo和Nacos进行对比。但对于一个开源项目的选型，除了以上这4个方面，项目上的人力投入（迭代进度、文档的完整性）、社区的活跃度（issue的数量和解决速度、Contributor数量、社群的交流频次等）、社区的规范程度（免责说明、安全性说明等），这些可能才是用户更关注的内容。
 
-  跟踪器(Tracer)位于你的应用程序中，并记录发生的操作的时间和元数据,提供了相应的类库，对用户的使用来说是透明的，收集的跟踪数据称为Span;将数据发送到Zipkin的仪器化应用程序中的组件称为Reporter,Reporter通过几种传输方式之一将追踪数据发送到Zipkin收集器(collector)，然后将跟踪数据进行存储(storage),由API查询存储以向UI提供数据。
+https://www.jianshu.com/p/2f0ae9c7f2e1
+
+**appolo**
+
+
+
+**nacos**
+
+ - Nacos Config 数据结构
+
+   Nacos Config 主要通过 dataId 和 group 来唯一确定一条配置.
+
+   Nacos Client 从 Nacos Server 端获取数据时，调用的是此接口 ConfigService.getConfig(String dataId, String group, long timeoutMs)。
+
+ - #### Spring Cloud 应用获取数据
+
+   **dataId**
+   在 Nacos Config Starter 中，dataId 的拼接格式如下
+
+   ~~~
+   ${prefix} - ${spring.profiles.active} . ${file-extension}
+   ~~~
+
+     prefix 默认为 spring.application.name 的值，也可以通过配置项 spring.cloud.nacos.config.prefix来配置。
+
+     spring.profiles.active 即为当前环境对应的 profile，详情可以参考 Spring Boot文档
+
+     注意，当 activeprofile 为空时，对应的连接符 - 也将不存在，dataId 的拼接格式变成 p r e f i x . {prefix}.prefix.{file-extension}
+
+     file-extension 为配置内容的数据格式，可以通过配置项 spring.cloud.nacos.config.file-extension来配置。 目前支持 properties 、yml类型。
+
+     **group**
+     group 默认为 DEFAULT_GROUP，可以通过 spring.cloud.nacos.config.group 配置。
+
+   - #### 自动注入
+
+     - Nacos Config Starter 实现了 org.springframework.cloud.bootstrap.config.PropertySourceLocator接口，并将优先级设置成了最高。
+
+       在 Spring Cloud 应用启动阶段，会主动从 Nacos Server 端获取对应的数据，并将获取到的数据转换成 PropertySource 且注入到 Environment 的 PropertySources 属性中，所以使用 @Value 注解也能直接获取 Nacos Server 端配置的内容。
+
+   - #### 动态刷新
+
+     - Nacos Config Starter 默认为所有获取数据成功的 Nacos 的配置项添加了监听功能，在监听到服务端配置发生变化时会实时触发 org.springframework.cloud.context.refresh.ContextRefresher 的 refresh 方法 。
+
+       如果需要对 Bean 进行动态刷新，给类添加 @RefreshScope 或 @ConfigurationProperties注解。
+
+   - #### Endpoint 信息查看
+
+     - Springboot支持这一点，Nacos Config也同时可以使用Endpoint来暴露信息。
+
+       在maven 中添加 spring-boot-starter-actuator依赖，并在配置中允许 Endpoints 的访问。
+
+       Spring Boot 1.x 中添加配置 management.security.enabled=false
+       Spring Boot 2.x 中添加配置 management.endpoints.web.exposure.include=*
+       Spring Boot 1.x 可以通过访问 http://127.0.0.1:18084/nacos_config 来查看 Nacos Endpoint 的信息。
+
+       Spring Boot 2.x 可以通过访问 http://127.0.0.1:18084/actuator/nacos-config 来访问。
+
+   - #### 配置项
+
+     | 配置项                                    | 默认值        | 说明                                                         |
+     | ----------------------------------------- | ------------- | ------------------------------------------------------------ |
+     | spring.cloud.nacos.config.server-addr     |               | 服务端地址                                                   |
+     | spring.cloud.nacos.config.prefix          |               | DataId前缀;一般采用spring.application.name                   |
+     | spring.cloud.nacos.config.group           | DEFAULT_GROUP | Group                                                        |
+     | spring.cloud.nacos.config.file-extension  | properties    | dataId的后缀，同时也是配置内容的文件格式，目前支持 properties、yml |
+     | spring.cloud.nacos.config.encode          | UTF-8         | 配置的编码                                                   |
+     | spring.cloud.nacos.config.timeout         | 3000          | 获取配置的超时时间;单位为 ms                                 |
+     | spring.cloud.nacos.config.namespace       |               | 配置的命名空间;常用场景之一是不同环境的配置的区分隔离，例如开发测试环境和生产环境的资源隔离等。 |
+     | spring.cloud.nacos.config.access-key      |               | AccessKey                                                    |
+     | spring.cloud.nacos.config.access-key      |               | SecretKey                                                    |
+     | spring.cloud.nacos.config.context-path    |               | 服务端 API 的相对路径                                        |
+     | spring.cloud.nacos.config.endpoint        |               | 地域的某个服务的入口域名，通过此域名可以动态地拿到服务端地址 |
+     | spring.cloud.nacos.config.refresh.enabled | true          |                                                              |
+
+   - 
+
+
+
+### 链路追踪(Zipkin、Skywalking)
+
+1. **Spring Cloud Sleuth**
+
+   在服务调用的请求和响应中加入ID，标明上下游请求的关系。利用这些信息，可以可视化地分析服务调用链路和服务间的依赖关系。**Spring Cloud Sleuth是对Zipkin的一个封装**。对于Span、Trace等信息的生成、接入HTTP Request，以及向Zipkin Server发送采集信息等全部自动完成。
+
+   - Request Header
+
+     Sleuth会在请求的 Header 中增加实现跟踪需的信息，使用 request.getHeaderNames() 取出所有头信息。可以看到，在请求头信息中多了 4 个属性：
+
+     - x-b3-spanid：一个工作单元(rpc 调用)的唯一标识。
+     - x-b3-parentspanid：当前工作单元的上一个工作单元，Root Span(请求链路的第一个工作单元)的值为空。
+     - x-b3-traceid：一条请求链条(trace) 的唯一标识。
+     - x-b3-sampled：是否被抽样为输出的标志，1 为需要被输出，0 为不需要被输出。
+
+   - 日志跟踪接入
+
+     Sleuth会把跟踪数据 (appname、traceId、spanId、exportable) 添加到 Slf4J MDC 中，因此您可以从日志聚合器中的给定跟踪或跨度中提取所有日志，MDC 的实现实际是将需要记录到日志的信息设置到当前线程的上下文(ThreadContext)中。
+
+     MDC 中的信息：[appname,traceId,spanId,exportable]
+
+     - appname：应用名称，即 spring.application.name 的值。
+     - tranceId：整个请求链路的唯一ID。
+     - spanId：基本的工作单元，一个 RPC 调用就是一个新的 span。启动跟踪的初始 *span* 称为 *root span* ，此 spanId 的值与 traceId 的值相同。
+     - exportable：是否将数据导入到 Zipkin 中，true 表示导入成功，false 表示导入失败。
+
+   - 跟踪原理
+
+     分布式系统中的服务调用链路跟踪在理论上并不复杂，主要有个关键点，一个是为请求链路创建唯一跟踪标识，二个统计各个处理单元的延迟时间。
+
+     1. 为了实现请求链路跟踪，当请求发送到分布式系统的入口时，只需要在服务跟踪框架为该请求创建唯一的跟踪标识，并保证该标识在在分布式系统内部流转，直到返回请求为止。该标识即为 traceId，通过该标识，就能将不同服务调用的日志串联起来。
+     2. 为了统计各处理单元(应用服务)的延迟，当请求到达或处理逻辑达到某个状态时，也通过一个唯一标识来标记开始、具体过程及结束(标识一个服务内请求进入、处理到结束)，该标识即为 spanId。对于每个 spanId 来说，必须有开始和结束两个节点，通过计算开始 span 和 结束 span 的时间戳，就能统记出该 span 的时间延迟。
+
+   - 采样比例
+
+     跟踪信息收集默认是 0.1(10%) 的采样比例，可通过 probability 属性修改；或可采用每秒速率来控制采集数据，属性是 rate。
+
+     ~~~xml
+     # 跟踪信息收集采样比例，默认 0.1，为 1 是即 100%，收集所有
+     spring.sleuth.sampler.probability=1
+     # 每秒速率，即每秒最多能跟踪的请求，rate 优先
+     spring.sleuth.sampler.rate=50
+     ~~~
+
+2. **Zipkin**
+
+   跟踪器(Tracer)位于你的应用程序中，并记录发生的操作的时间和元数据,提供了相应的类库，对用户的使用来说是透明的，收集的跟踪数据称为Span;将数据发送到Zipkin的仪器化应用程序中的组件称为Reporter,Reporter通过几种传输方式之一将追踪数据发送到Zipkin收集器(collector)，然后将跟踪数据进行存储(storage),由API查询存储以向UI提供数据。
+
+3. **SkyWalking**
+
+    
+
+   1. 环境搭建
+
+      ~~~
+      1.首先安装elasticsearch，将压缩包解压
+      wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.8.16.tar.gz
+      tar -zxvf elasticsearch-6.8.16.tar.gz
+      ./elasticsearch &
+      2.安装Skywalking：https://skywalking.apache.org/downloads/
+        	 wget https://downloads.apache.org/skywalking/8.6.0/apache-skywalking-apm-8.6.0.tar.gz
+        	 tar -zxvf apache-skywalking-apm-8.6.0.tar.gz
+        	 cd apache-skywalking-apm-bin
+      	 vi config/application.yml
+      	 
+      	 修改存储介质：
+      	 storage:
+       	 selector: ${SW_STORAGE:elasticsearch}    # 默认值改为elasticsearch
+        		# *** *** 省略
+        		elasticsearch:
+                nameSpace: ${SW_NAMESPACE:"skywalking-index"}       # 添加默认 skywalking-index
+                clusterNodes: ${SW_STORAGE_ES_CLUSTER_NODES:server-com:9200}   # 连接56服务器的es
+                protocol: ${SW_STORAGE_ES_HTTP_PROTOCOL:"http"}
+                #trustStorePath: ${SW_SW_STORAGE_ES_SSL_JKS_PATH:"../es_keystore.jks"}   # 注释掉
+                #trustStorePass: ${SW_SW_STORAGE_ES_SSL_JKS_PASS:""}                      # 注释掉
+                
+           ./oapService.sh
+           
+      	修改web端口：
+      		vi ./webapp/webapp.yml
+      		
+              server:
+                port: 9090     # 修改默认8080端口为 9090
+      
+      	./webappService.sh
+      		
+      ~~~
+
+      
+
+   2. idea配置探针
+
+      修改项目的 VM 运行参数，点击菜单栏中的 `Run` -> `EditConfigurations...`，此处我们以 `nacos-provider` 项目为例，修改参数如下
+
+      ~~~
+      -javaagent:D:\config\skywalking\agent\skywalking-agent.jar
+      -Dskywalking.agent.service_name=os-cloud-api-service
+      -Dskywalking.collector.backend_service=http://10.138.60.232:11800
+      ~~~
+
+      `-javaagent`：用于指定探针路径
+
+      `-Dskywalking.agent.service_name`：用于重写 `agent/config/agent.config` 配置文件中的服务名
+
+      `-Dskywalking.collector.backend_service`：用于重写 `agent/config/agent.config` 配置文件中的服务地址
+
+   3. java启动方式
+
+      ~~~shell
+      java -javaagent:/path/to/skywalking-agent/skywalking-agent.jar -Dskywalking.agent.service_name=nacos-provider -Dskywalking.collector.backend_service=localhost:11800 -jar yourApp.jar
+      ~~~
+
+      
+
+   4. 
 
 ### 负载均衡(Ribbon)
 
