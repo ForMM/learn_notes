@@ -404,5 +404,17 @@ SpringMVC框架是以请求为驱动，围绕Servlet设计，将请求发给控�
 
 
 
+### Spring事件发布与监听机制
+
+完整的事件操作有三部门组成： 事件 、事件监听器、事件发布器。
+
+<img src="/Users/hayashika/program-kk/学习笔记/learn_notes/img/springevent.jpeg" alt="springevent" style="zoom:55%;" />
+
+事件的发布者发布事件，事件的监听者对对应的事件进行监听，当监听到对应的事件时，就会触发调用相关的方法。因此，在事件处理中，事件是核心，是事件发布者和事件监听者的桥梁。
+
+https://blog.csdn.net/qq_28060549/article/details/81073001
+
+
+
 
 

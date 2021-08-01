@@ -437,7 +437,7 @@ https://www.jianshu.com/p/2f0ae9c7f2e1
      | spring.cloud.nacos.config.endpoint        |               | 地域的某个服务的入口域名，通过此域名可以动态地拿到服务端地址 |
      | spring.cloud.nacos.config.refresh.enabled | true          |                                                              |
 
-   - 
+   - maven
 
 
 
@@ -664,9 +664,34 @@ Hystrix设计原则：
 
   ​	在测试hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds 属性的时候，服务端如果在指定的时间返回了结果，但系统还是调用了fallback里的逻辑，需要指定ribbon.ReadTimeout的时间。
 
-### 网关(Zuul\Gateway)
+### 网关(Zuul、Gateway)
 
 网关通常在项目中为了简化前端的调用逻辑，同时也简化内部服务之间互相调用的复杂度；具体作用就是转发服务，接收并转发所有内外部的客户端调用；其他常见的功能还有权限认证，限流控制等等。
+
+- 路由转发
+
+  集成nacos实现动态路由
+
+- 限流控制
+
+  1. Sentinel限流原理
+
+  2. Sentinel快速搭建
+
+     sentinel dashboard搭建，下载，命令运行
+
+     ~~~shell
+     java -Dserver.port=8080 -Dcsp.sentinel.dashboard.server=localhost:8080 -Dproject.name=sentinel-dashboard -jar sentinel-dashboard.jar
+     
+     ~~~
+
+     
+
+     
+
+  3. 
+
+- 
 
 ### 雪崩
 

@@ -1,5 +1,20 @@
 # Linux指令
 
+### Linux系统基本上分两大类
+
+RedHat系列：Redhat、Centos、Fedora等
+
+Debian系列：Debian、Ubuntu等
+
+- RedHat 系列
+  -  常见的安装包格式 rpm包,安装rpm包的命令是“rpm -参数”
+  -  包管理工具 yum
+  -  支持tar包
+- Debian系列
+  - 常见的安装包格式 deb包,安装deb包的命令是“dpkg -参数”
+  - 包管理工具 apt-get
+  - 支持tar包
+
 ### 系统相关命令
 
 ~~~shell
@@ -8,6 +23,14 @@ head -n 1 /etc/issue  # 查看操作系统版本
 df -h;(查看磁盘情况)
 free -m;(查看内存使用量和交换区使用量)
 ~~~
+
+### 设置环境变量
+
+~~~
+/etc/profile  （系统环境变量文件）
+~~~
+
+
 
 ### 查看端口占用
 

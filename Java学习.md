@@ -1,12 +1,84 @@
-# Java知识总结
+### Java基础知识
 
-### Java运算符
+#### 基础概念
+
+#### 基本语法
+
+##### 	自增自减
+
+​		需要某个整数类型变量增加 1 或减少 1，Java 提供了一种特殊的运算符，用于这种表达式，叫做自增运算符（++)和自减运算符（--）。++和--运算符可以放在变量之前，也可以放在变量之后，当运算符放在变量之前时(前缀)，先自增/减，再赋值；当运算符放在变量之后时(后缀)，先赋值，再自增/减。
+
+##### 	continue、break、和 return 的区别是什么？
+
+  		1. continue ：指跳出当前的这一次循环，继续下一次循环。
+  		2. break ：指跳出整个循环体，继续执行循环下面的语句。
+
+return 用于跳出所在方法，结束该方法的运行。return 一般有两种用法：
+
+1. `return;` ：直接使用 return 结束方法执行，用于没有返回值函数的方法
+
+2. `return value;` ：return 一个特定值，用于有返回值函数的方法
+
+   ##### 泛型
+
+   Java 在编译期间，所有的泛型信息都会被擦掉，这也就是通常所说类型擦除 。
+
+   泛型一般有三种使用方式:泛型类、泛型接口、泛型方法。
+
+   **常用的通配符为： T，E，K，V，？**
+
+   - ？ 表示不确定的 java 类型
+   - T (type) 表示具体的一个 java 类型
+   - K V (key value) 分别代表 java 键值中的 Key Value
+   - E (element) 代表 Element
+
+#### 基本数据类型
+
+	1. bit就是位，也叫比特位，是计算机表示数据最小的单位
+ 	2. byte就是字节
+ 	3. 1byte=8bit ，0001 1100，一般用两个16进制来显示，所以我们经常看到1个字节显示为 1c
+ 	4. 1byte就是1B
+
+<img src="/Users/hayashika/program-kk/学习笔记/learn_notes/img/java-datatype-1.jpeg" alt="java-datatype-1" style="zoom:80%;" />
+
+由于数据在计算机中的表示，最终以**二进制**的形式存在，所以有时候使用二进制，可以更直观地解决问题。 
+但，二进制数太长了。所以就产生了其他进制数据。
+
+十六进制整型常量：以十六进制表示时，需以0x或0X开头，如0xff,0X9A。
+
+八进制整型常量：八进制必须以0开头，如0123，034。
+
+长整型：长整型必须以L作结尾，如9L,342L。
+
+浮点数常量：由于小数常量的默认类型是double型，所以float类型的后面一定要加f(F)。同样带小数的变量默认为double类型。
+
+如：float f;f=1.3f;//必须声明f。
+
+字符常量：字符型常量需用两个单引号括起来（注意字符串常量是用两个双引号括起来）。Java中的字符占两个字节。
+
+**Java运算符**
 
 <<   :  左移运算符，num <<1,相当于num乘以2
 
 \>>   :  右移运算符，num >>1,相当于num除以2
 
 \>>>  :  无符号右移，忽略符号位，空位都以0补齐，（计算机中数字以补码存储，首位为符号位）。
+
+#### 面向对象
+
+#### 	
+
+​		
+
+#### 反射
+
+#### 异常
+
+#### IO流
+
+
+
+
 
 ### HashMap原理
 
@@ -257,4 +329,64 @@ dubbo等rpc框架
 
    在等待delay毫秒后首次执行task，每隔period毫秒重复执行task
 
-   
+
+### java事件
+
+JDK为用户实现自定义事件监听提供了两个基础的类。一个是代表所有可被监听事件的事件基类java.util.EventObject,所有自定义事件类型都必须继承该类,类结构如下所示:
+
+~~~java
+public class EventObject implements java.io.Serializable {
+
+    private static final long serialVersionUID = 5516075349620653480L;
+
+    /**
+     * The object on which the Event initially occurred.
+     */
+    protected transient Object  source;
+
+    /**
+     * Constructs a prototypical Event.
+     *
+     * @param    source    The object on which the Event initially occurred.
+     * @exception  IllegalArgumentException  if source is null.
+     */
+    public EventObject(Object source) {
+        if (source == null)
+            throw new IllegalArgumentException("null source");
+
+        this.source = source;
+    }
+
+    /**
+     * The object on which the Event initially occurred.
+     *
+     * @return   The object on which the Event initially occurred.
+     */
+    public Object getSource() {
+        return source;
+    }
+
+    /**
+     * Returns a String representation of this EventObject.
+     *
+     * @return  A a String representation of this EventObject.
+     */
+    public String toString() {
+        return getClass().getName() + "[source=" + source + "]";
+    }
+}
+~~~
+
+该类内部有一个Object类型的source变量,逻辑上表示发生该事件的事件源,实际中可以用来存储包含该事件的一些相关信息。
+另一个则是对所有事件监听器进行抽象的接口java.util.EventListener,这是一个标记接口,内部没有任何抽象方法,所有自定义事件监听器都必须实现该标记接口:
+
+~~~java
+/**
+ * A tagging interface that all event listener interfaces must extend.
+ * @since JDK1.1
+ */
+public interface EventListener {
+}
+~~~
+
+针对具体业务场景,我们通过扩展java.util.EventObject来自定义事件类型,同时通过扩展java.util.EventListener来定义在特定事件发生时被触发的事件监听器。

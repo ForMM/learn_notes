@@ -284,6 +284,14 @@ cpu执行指令可能是无序的，它有两个比较重要的作用
 
 #### 锁体系synchronized
 
+![synchronized](/Users/hayashika/program-kk/学习笔记/learn_notes/img/synchronized.jpeg)
+
+Java中每一个对象都可以作为锁，这是synchronized实现同步的基础：
+
+1. 普通同步方法（实例方法），锁是当前实例对象 ，进入同步代码前要获得当前实例的锁
+2. 静态同步方法，锁是当前类的class对象 ，进入同步代码前要获得当前类对象的锁
+3. 同步方法块，锁是括号里面的对象，对给定对象加锁，进入同步代码库前要获得给定对象的锁。
+
 - 使用方法及原理
 
   锁住对象：使用 javap -verbose TestClass 查看使用的字节码指令为：monitorenter、monitorexit
@@ -291,6 +299,10 @@ cpu执行指令可能是无序的，它有两个比较重要的作用
   锁住方法：使用 ACC_SYNCHRONIZED 标识，该标识指明了该方法是一个同步方法，JVM 通过该 ACC_SYNCHRONIZED 访问标志来辨别一个方法是否声明为同步方法，从而执行相应的同步调用。
 
 - java对象结构
+
+  ![synchronied-1](/Users/hayashika/program-kk/学习笔记/learn_notes/img/synchronied-1.jpeg)
+
+  JVM 中，对象在内存中分为三块区域：对象头，实例数据，对其填充
 
   Java对象存储在堆（Heap）内存，Hotspot的对象头主要包括两部分数据：Mark Word（标记字段）、Klass Pointer（类型指针）。
 
@@ -304,7 +316,25 @@ cpu执行指令可能是无序的，它有两个比较重要的作用
 
 - Jdk1.6后锁优化
 
+  ![synchronied-2](/Users/hayashika/program-kk/学习笔记/learn_notes/img/synchronied-2.jpeg)
+  
   锁的状态共有四种：**无锁态、偏向锁、轻量级锁和重量级锁**，其中偏向锁和轻量级锁是 JDK1.6 开始为了减少获得锁和释放锁带来的性能消耗而引入的。 四种锁的状态会随着竞争情况逐渐升级，锁可以升级但是不能降级，意味着偏向锁可以升级为轻量级锁但是轻量级锁不能降级为偏向锁，目的是为了提高获得锁和释放锁的效率。
+  
+  **偏向锁**：对象头是由Mark Word和Klass pointer 组成，锁争夺也就是对象头指向的Monitor对象的争夺，一旦有线程持有了这个对象，标志位修改为1，就进入偏向模式，同时会把这个线程的ID记录在对象的Mark Word中。
+  
+  这个过程是采用了CAS乐观锁操作的，每次同一线程进入，虚拟机就不进行任何同步的操作了，对标志位+1就好了，不同线程过来，CAS会失败，也就意味着获取锁失败。
+  
+  **轻量级锁**：还是跟Mark Work 相关，如果这个对象是无锁的，jvm就会在当前线程的栈帧中建立一个叫锁记录（Lock Record）的空间，用来存储锁对象的Mark Word 拷贝，然后把Lock Record中的owner指向当前对象。
+  
+  JVM接下来会利用CAS尝试把对象原本的Mark Word 更新会Lock Record的指针，成功就说明加锁成功，改变锁标志位，执行相关同步操作。
+  
+  如果失败了，就会判断当前对象的Mark Word是否指向了当前线程的栈帧，是则表示当前的线程已经持有了这个对象的锁，否则说明被其他线程持有了，继续锁升级，修改锁的状态，之后等待的线程也阻塞。
+  
+  
+  
+  
+  
+  
 
 #### 公平锁和非公平锁在jdk里的体现
 
